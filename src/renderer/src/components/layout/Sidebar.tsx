@@ -1,8 +1,8 @@
 import { motion } from 'motion/react'
-import { BarChart3, Calendar, LayoutGrid, Settings } from 'lucide-react'
+import { BarChart3, Calendar, LayoutGrid, Settings, Tags } from 'lucide-react'
 import { CategoryFilterTabs } from './CategoryFilterTabs'
-import { ThemePicker } from './ThemePicker'
 import { sliderSpring } from '@renderer/lib/motionPresets'
+import logoMark from '@renderer/assets/logo-mark.png'
 import type { Activity } from '@shared/types'
 import type { ViewMode } from '@renderer/state/store'
 
@@ -19,6 +19,7 @@ interface SidebarProps {
   categoryFilter: string
   onCategoryFilterChange: (id: string) => void
   onManageCategories: () => void
+  onOpenSettings: () => void
 }
 
 export function Sidebar({
@@ -27,7 +28,8 @@ export function Sidebar({
   activities,
   categoryFilter,
   onCategoryFilterChange,
-  onManageCategories
+  onManageCategories,
+  onOpenSettings
 }: SidebarProps): JSX.Element {
   return (
     <aside
@@ -37,11 +39,18 @@ export function Sidebar({
         paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))'
       }}
     >
-      <div className="flex items-center gap-2.5 px-5 pb-6">
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--accent)] text-sm font-bold text-white shadow-elevation-sm">
-          A
-        </div>
-        <span className="text-sm font-semibold tracking-tight">Rhythm</span>
+      <div className="mt-8 flex items-center gap-2.5 px-5 pb-6">
+        <img
+          src={logoMark}
+          alt="Rhythm"
+          className="h-8 w-8 flex-shrink-0 rounded-lg object-cover shadow-elevation-sm"
+        />
+        <span
+          className="text-base font-bold tracking-tight"
+          style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}
+        >
+          Rhythm
+        </span>
       </div>
 
       <nav className="flex flex-col gap-0.5 px-3">
@@ -87,10 +96,16 @@ export function Sidebar({
           onClick={onManageCategories}
           className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
         >
-          <Settings size={15} />
+          <Tags size={15} />
           Manage categories
         </button>
-        <ThemePicker variant="row" />
+        <button
+          onClick={onOpenSettings}
+          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+        >
+          <Settings size={15} />
+          Settings
+        </button>
       </div>
     </aside>
   )

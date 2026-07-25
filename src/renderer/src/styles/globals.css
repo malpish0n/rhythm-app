@@ -1,19 +1,27 @@
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/manrope';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+@import '@fontsource/poppins/400.css';
+@import '@fontsource/poppins/500.css';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/poppins/700.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Fallback palette (Olive Ember) shown before the theme effect in App.tsx applies
+/* Fallback palette (Deep Space) shown before the theme effect in App.tsx applies
    the user's actual selected theme via inline CSS variables. */
 :root {
-  --bg: #3f3f37;
-  --surface: #444134;
-  --surface-2: #494331;
-  --border: #9b4c27;
-  --text: #d6d6b1;
-  --text-muted: #a3a188;
-  --accent: #de541e;
+  --bg: #080a12;
+  --surface: #1a2036;
+  --surface-2: #333b52;
+  --border: #515972;
+  --text: #f5f7fa;
+  --text-muted: #757f9a;
+  --accent: #22d3ee;
 
   --shadow-sm:
     0 1px 2px rgba(0, 0, 0, 0.06),
@@ -26,6 +34,8 @@
     0 16px 32px rgba(0, 0, 0, 0.14),
     0 6px 12px rgba(0, 0, 0, 0.08),
     0 2px 4px rgba(0, 0, 0, 0.05);
+
+  --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
 }
 
 * {
@@ -37,7 +47,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-feature-settings: 'tnum' 1;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

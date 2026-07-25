@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { BarChart3, Calendar, LayoutGrid, MoreHorizontal, Settings, X } from 'lucide-react'
+import { BarChart3, Calendar, LayoutGrid, MoreHorizontal, Settings, Tags, X } from 'lucide-react'
 import { CategoryFilterTabs } from './CategoryFilterTabs'
-import { ThemePicker } from './ThemePicker'
 import { fade, sliderSpring } from '@renderer/lib/motionPresets'
 import type { Activity } from '@shared/types'
 import type { ViewMode } from '@renderer/state/store'
@@ -20,6 +19,7 @@ interface MobileBottomBarProps {
   categoryFilter: string
   onCategoryFilterChange: (id: string) => void
   onManageCategories: () => void
+  onOpenSettings: () => void
 }
 
 export function MobileBottomBar({
@@ -28,7 +28,8 @@ export function MobileBottomBar({
   activities,
   categoryFilter,
   onCategoryFilterChange,
-  onManageCategories
+  onManageCategories,
+  onOpenSettings
 }: MobileBottomBarProps): JSX.Element {
   const [sheetOpen, setSheetOpen] = useState(false)
 
@@ -118,10 +119,19 @@ export function MobileBottomBar({
                   }}
                   className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
                 >
-                  <Settings size={15} />
+                  <Tags size={15} />
                   Manage categories
                 </button>
-                <ThemePicker variant="row" />
+                <button
+                  onClick={() => {
+                    onOpenSettings()
+                    setSheetOpen(false)
+                  }}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+                >
+                  <Settings size={15} />
+                  Settings
+                </button>
               </div>
             </motion.div>
           </motion.div>
