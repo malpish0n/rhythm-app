@@ -8,8 +8,9 @@ import { CalendarTooltip } from './CalendarTooltip'
 import { DayDetailPopover } from './DayDetailPopover'
 import type { Activity } from '@shared/types'
 
-const CELL_SIZE = 13
-const GAP = 4
+const CELL_WIDTH = 13
+const CELL_HEIGHT = 10
+const GAP = 3
 
 interface YearCalendarProps {
   year: number
@@ -62,15 +63,21 @@ export function YearCalendar({
           <div className="flex" style={{ gap: GAP }}>
             <div
               className="flex flex-shrink-0 flex-col justify-between pr-2 pt-5 text-xs text-[var(--text-muted)]"
-              style={{ height: CELL_SIZE * 7 + GAP * 6 + 20 }}
+              style={{ height: CELL_HEIGHT * 7 + GAP * 6 + 20 }}
             >
               <span>Mon</span>
               <span>Wed</span>
               <span>Fri</span>
             </div>
 
-            <div className="overflow-x-auto">
-              <MonthBlock monthLabels={matrix.monthLabels} cellSize={CELL_SIZE} gap={GAP} noIndent />
+            {/* py-2 gives hover-scaled cells room; overflow-x-auto forces overflow-y to auto too, so top/bottom rows get clipped without it */}
+            <div className="overflow-x-auto py-2">
+              <MonthBlock
+                monthLabels={matrix.monthLabels}
+                cellWidth={CELL_WIDTH}
+                gap={GAP}
+                noIndent
+              />
 
               <div className="flex" style={{ gap: GAP, marginTop: 4 }}>
                 {matrix.weeks.map((week, weekIdx) => (
@@ -85,6 +92,8 @@ export function YearCalendar({
                         activeActivity={activeActivity}
                         activities={activities}
                         index={weekIdx * 7 + dayIdx}
+                        width={CELL_WIDTH}
+                        height={CELL_HEIGHT}
                         onHover={handleHover}
                         onLeave={() => setHover(null)}
                         onClick={setSelectedDate}

@@ -1,20 +1,11 @@
-import { motion } from 'motion/react'
-import { BarChart3, Calendar, LayoutGrid, Settings, Tags } from 'lucide-react'
+import { Settings, Tags } from 'lucide-react'
 import { CategoryFilterTabs } from './CategoryFilterTabs'
-import { sliderSpring } from '@renderer/lib/motionPresets'
-import logoMark from '@renderer/assets/logo-mark.png'
+import { useAppStore } from '@renderer/state/store'
+import iconLight from '@renderer/assets/icon-round-light.png'
+import iconDark from '@renderer/assets/icon-round-dark.png'
 import type { Activity } from '@shared/types'
-import type { ViewMode } from '@renderer/state/store'
-
-const VIEW_MODES: { mode: ViewMode; label: string; icon: typeof Calendar }[] = [
-  { mode: 'month', label: 'Month', icon: Calendar },
-  { mode: 'heatmap', label: 'Heatmap', icon: LayoutGrid },
-  { mode: 'summary', label: 'Summary', icon: BarChart3 }
-]
 
 interface SidebarProps {
-  viewMode: ViewMode
-  onViewModeChange: (mode: ViewMode) => void
   activities: Activity[]
   categoryFilter: string
   onCategoryFilterChange: (id: string) => void
@@ -23,14 +14,15 @@ interface SidebarProps {
 }
 
 export function Sidebar({
-  viewMode,
-  onViewModeChange,
   activities,
   categoryFilter,
   onCategoryFilterChange,
   onManageCategories,
   onOpenSettings
 }: SidebarProps): JSX.Element {
+  const dockIconStyle = useAppStore((s) => s.dockIconStyle)
+  const logoMark = dockIconStyle === 'dark' ? iconDark : iconLight
+
   return (
     <aside
       className="glass-surface fixed inset-y-0 left-0 z-30 hidden w-60 flex-col overflow-y-auto lg:flex"
@@ -43,7 +35,7 @@ export function Sidebar({
         <img
           src={logoMark}
           alt="Rhythm"
-          className="h-8 w-8 flex-shrink-0 rounded-lg object-cover shadow-elevation-sm"
+          className="h-8 w-8 flex-shrink-0 object-cover"
         />
         <span
           className="text-base font-bold tracking-tight"
@@ -53,34 +45,7 @@ export function Sidebar({
         </span>
       </div>
 
-      <nav className="flex flex-col gap-0.5 px-3">
-        {VIEW_MODES.map(({ mode, label, icon: Icon }) => {
-          const isActive = viewMode === mode
-          return (
-            <button
-              key={mode}
-              onClick={() => onViewModeChange(mode)}
-              className={
-                isActive
-                  ? 'relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-white'
-                  : 'relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
-              }
-            >
-              {isActive && (
-                <motion.span
-                  layoutId="activeViewMode"
-                  transition={sliderSpring}
-                  className="absolute inset-0 rounded-lg bg-[var(--accent)] shadow-elevation-sm"
-                />
-              )}
-              <Icon size={15} className="relative" />
-              <span className="relative">{label}</span>
-            </button>
-          )
-        })}
-      </nav>
-
-      <div className="mt-6 px-3">
+      <div className="px-3">
         <p className="mb-1.5 px-3 text-[10px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
           Categories
         </p>

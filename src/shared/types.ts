@@ -16,6 +16,7 @@ export interface LogEntry {
   count: number
   note: string | null
   createdAt: string
+  time: string | null // 'HH:MM' 24h, null for untimed/legacy entries
 }
 
 export interface DayAggregate {
@@ -36,6 +37,7 @@ export interface StreakResult {
 }
 
 export type ThemePreference = 'system' | string
+export type DockIconStyle = 'light' | 'dark'
 
 export interface CreateActivityInput {
   name: string
@@ -127,5 +129,7 @@ export interface ActivityApi {
   app: {
     getTheme(): Promise<ThemePreference>
     setTheme(theme: ThemePreference): Promise<void>
+    getDockIconStyle(): Promise<DockIconStyle>
+    setDockIconStyle(style: DockIconStyle): Promise<void>
   }
 }

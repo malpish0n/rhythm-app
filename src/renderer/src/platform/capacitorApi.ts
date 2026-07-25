@@ -14,6 +14,7 @@ import type {
   CreateActivityInput,
   CreatePlanRuleInput,
   DayAggregate,
+  DockIconStyle,
   LogEntry,
   PlanRule,
   ThemePreference,
@@ -154,10 +155,20 @@ export function createCapacitorApi(): ActivityApi {
         const db = await getDb()
         const id = newId()
         const entryDate = date ?? todayIso()
-        const createdAt = new Date().toISOString()
+        const now = new Date()
+        const createdAt = now.toISOString()
+        const time = now.toTimeString().slice(0, 5)
 
         try {
-          await db.run(SQL.logEntries.insert, [id, activityId, entryDate, count, null, createdAt])
+          await db.run(SQL.logEntries.insert, [
+            id,
+            activityId,
+            entryDate,
+            count,
+            null,
+            createdAt,
+            time
+          ])
         } catch (err) {
           // Same race guard as the Electron repo: a stray double-tap can race
           // the UI's own "already logged today" check — the unique
@@ -314,6 +325,19 @@ export function createCapacitorApi(): ActivityApi {
           `INSERT INTO app_meta (key, value) VALUES ('theme', ?)
            ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
           [theme]
+        )
+      },
+      async getDockIconStyle(): Promise<DockIconStyle> {
+        const db = await getDb()
+        const res = await db.query(`SELECT value FROM app_meta WHERE key = 'dockIconStyle'`)
+        return res.values?.[0]?.value === 'dark' ? 'dark' : 'light'
+      },
+      async setDockIconStyle(style: DockIconStyle): Promise<void> {
+        const db = await getDb()
+        await db.run(
+          `INSERT INTO app_meta (key, value) VALUES ('dockIconStyle', ?)
+           ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+          [style]
         )
       }
     }

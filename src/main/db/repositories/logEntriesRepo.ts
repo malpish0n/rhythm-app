@@ -32,10 +32,12 @@ export function quickAdd(activityId: string, date?: string, count = 1): LogEntry
   const db = getDb()
   const id = randomUUID()
   const entryDate = date ?? todayIso()
-  const createdAt = new Date().toISOString()
+  const now = new Date()
+  const createdAt = now.toISOString()
+  const time = now.toTimeString().slice(0, 5)
 
   try {
-    db.prepare(SQL.logEntries.insert).run(id, activityId, entryDate, count, null, createdAt)
+    db.prepare(SQL.logEntries.insert).run(id, activityId, entryDate, count, null, createdAt, time)
   } catch (err) {
     // A stray double-tap can race the UI's own "already logged today" check —
     // the unique (activity_id, date) index rejects the duplicate; return the

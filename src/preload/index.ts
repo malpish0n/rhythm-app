@@ -4,6 +4,7 @@ import type {
   ActivityApi,
   CreateActivityInput,
   CreatePlanRuleInput,
+  DockIconStyle,
   ThemePreference,
   UpdateActivityInput,
   UpdateLogEntryInput,
@@ -50,7 +51,10 @@ const api: ActivityApi = {
   },
   app: {
     getTheme: () => ipcRenderer.invoke(CHANNELS.app.getTheme),
-    setTheme: (theme: ThemePreference) => ipcRenderer.invoke(CHANNELS.app.setTheme, theme)
+    setTheme: (theme: ThemePreference) => ipcRenderer.invoke(CHANNELS.app.setTheme, theme),
+    getDockIconStyle: () => ipcRenderer.invoke(CHANNELS.app.getDockIconStyle),
+    setDockIconStyle: (style: DockIconStyle) =>
+      ipcRenderer.invoke(CHANNELS.app.setDockIconStyle, style)
   }
 }
 

@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { Flame } from 'lucide-react'
+import { AnimatedFlame } from './AnimatedFlame'
 
 interface StreakCardProps {
   label: string
@@ -9,7 +9,13 @@ interface StreakCardProps {
   celebrate: boolean
 }
 
-export function StreakCard({ label, current, longest, color, celebrate }: StreakCardProps): JSX.Element {
+export function StreakCard({
+  label,
+  current,
+  longest,
+  color,
+  celebrate
+}: StreakCardProps): JSX.Element {
   return (
     <motion.div
       layout
@@ -19,7 +25,8 @@ export function StreakCard({ label, current, longest, color, celebrate }: Streak
         <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
         {label}
       </div>
-      <div className="flex items-baseline gap-2">
+      <div className="flex items-center gap-2">
+        <AnimatedFlame current={current} />
         <motion.span
           key={current}
           initial={celebrate ? { scale: 1.4 } : false}
@@ -30,16 +37,6 @@ export function StreakCard({ label, current, longest, color, celebrate }: Streak
           {current}
         </motion.span>
         <span className="text-xs text-[var(--text-muted)]">day streak</span>
-        {celebrate && (
-          <motion.span
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-orange-400"
-          >
-            <Flame size={16} />
-          </motion.span>
-        )}
       </div>
       <span className="text-xs text-[var(--text-muted)]">Longest: {longest}</span>
     </motion.div>

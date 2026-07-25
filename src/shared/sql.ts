@@ -2,13 +2,15 @@ import migration001 from './migrations/001_init.sql?raw'
 import migration002 from './migrations/002_add_increment.sql?raw'
 import migration003 from './migrations/003_unique_activity_date.sql?raw'
 import migration004 from './migrations/004_plan_rules.sql?raw'
+import migration005 from './migrations/005_log_entry_time.sql?raw'
 import type { Activity, LogEntry, PlanRule, StreakResult } from './types'
 
 export const MIGRATIONS: { version: number; sql: string }[] = [
   { version: 1, sql: migration001 },
   { version: 2, sql: migration002 },
   { version: 3, sql: migration003 },
-  { version: 4, sql: migration004 }
+  { version: 4, sql: migration004 },
+  { version: 5, sql: migration005 }
 ]
 
 export const SQL = {
@@ -36,8 +38,8 @@ export const SQL = {
     aggregateByRangeActivity: `SELECT date, activity_id, SUM(count) AS total FROM log_entries
        WHERE date BETWEEN ? AND ? AND activity_id = ?
        GROUP BY date, activity_id`,
-    insert: `INSERT INTO log_entries (id, activity_id, date, count, note, created_at)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+    insert: `INSERT INTO log_entries (id, activity_id, date, count, note, created_at, time)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
     getById: 'SELECT * FROM log_entries WHERE id = ?',
     updateNoteCount: 'UPDATE log_entries SET note = ?, count = ? WHERE id = ?',
     lastForActivityDate: `SELECT id FROM log_entries WHERE activity_id = ? AND date = ?
@@ -83,6 +85,7 @@ export interface LogEntryRow {
   count: number
   note: string | null
   created_at: string
+  time: string | null
 }
 
 export function toActivity(row: ActivityRow): Activity {
@@ -138,7 +141,8 @@ export function toLogEntry(row: LogEntryRow): LogEntry {
     date: row.date,
     count: row.count,
     note: row.note,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    time: row.time
   }
 }
 

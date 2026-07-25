@@ -1,20 +1,11 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { BarChart3, Calendar, LayoutGrid, MoreHorizontal, Settings, Tags, X } from 'lucide-react'
+import { Menu, Settings, Tags, X } from 'lucide-react'
 import { CategoryFilterTabs } from './CategoryFilterTabs'
-import { fade, sliderSpring } from '@renderer/lib/motionPresets'
+import { fade } from '@renderer/lib/motionPresets'
 import type { Activity } from '@shared/types'
-import type { ViewMode } from '@renderer/state/store'
-
-const VIEW_MODES: { mode: ViewMode; label: string; icon: typeof Calendar }[] = [
-  { mode: 'month', label: 'Month', icon: Calendar },
-  { mode: 'heatmap', label: 'Heatmap', icon: LayoutGrid },
-  { mode: 'summary', label: 'Summary', icon: BarChart3 }
-]
 
 interface MobileBottomBarProps {
-  viewMode: ViewMode
-  onViewModeChange: (mode: ViewMode) => void
   activities: Activity[]
   categoryFilter: string
   onCategoryFilterChange: (id: string) => void
@@ -23,8 +14,6 @@ interface MobileBottomBarProps {
 }
 
 export function MobileBottomBar({
-  viewMode,
-  onViewModeChange,
   activities,
   categoryFilter,
   onCategoryFilterChange,
@@ -35,39 +24,14 @@ export function MobileBottomBar({
 
   return (
     <>
-      <nav
-        className="glass-surface fixed inset-x-0 bottom-0 z-30 flex items-center justify-around px-2 pt-2 lg:hidden"
-        style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+      <button
+        onClick={() => setSheetOpen(true)}
+        aria-label="Menu"
+        className="glass-surface fixed bottom-4 left-4 z-30 flex h-12 w-12 items-center justify-center rounded-full shadow-elevation-md lg:hidden"
+        style={{ bottom: 'max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))' }}
       >
-        {VIEW_MODES.map(({ mode, label, icon: Icon }) => {
-          const isActive = viewMode === mode
-          return (
-            <button
-              key={mode}
-              onClick={() => onViewModeChange(mode)}
-              className="relative flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors"
-              style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}
-            >
-              {isActive && (
-                <motion.span
-                  layoutId="activeMobileViewMode"
-                  transition={sliderSpring}
-                  className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-[var(--accent)]"
-                />
-              )}
-              <Icon size={19} />
-              {label}
-            </button>
-          )
-        })}
-        <button
-          onClick={() => setSheetOpen(true)}
-          className="flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10px] font-medium text-[var(--text-muted)]"
-        >
-          <MoreHorizontal size={19} />
-          More
-        </button>
-      </nav>
+        <Menu size={20} className="text-[var(--text)]" />
+      </button>
 
       <AnimatePresence>
         {sheetOpen && (
@@ -89,7 +53,7 @@ export function MobileBottomBar({
               style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
             >
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-semibold">More</p>
+                <p className="text-sm font-semibold">Menu</p>
                 <button
                   onClick={() => setSheetOpen(false)}
                   className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
