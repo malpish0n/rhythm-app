@@ -49,6 +49,12 @@ const api: ActivityApi = {
     unskipOccurrence: (planRuleId, date) =>
       ipcRenderer.invoke(CHANNELS.plans.unskipOccurrence, planRuleId, date)
   },
+  dayNotes: {
+    listByRange: (startDate, endDate) =>
+      ipcRenderer.invoke(CHANNELS.dayNotes.listByRange, startDate, endDate),
+    upsert: (date, content) => ipcRenderer.invoke(CHANNELS.dayNotes.upsert, date, content),
+    delete: (date) => ipcRenderer.invoke(CHANNELS.dayNotes.delete, date)
+  },
   app: {
     getTheme: () => ipcRenderer.invoke(CHANNELS.app.getTheme),
     setTheme: (theme: ThemePreference) => ipcRenderer.invoke(CHANNELS.app.setTheme, theme),

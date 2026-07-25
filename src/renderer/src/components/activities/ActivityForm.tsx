@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Minus, Plus } from 'lucide-react'
 import { CATEGORY_PALETTE } from '@renderer/lib/color'
 import { ActivityColorPicker } from './ActivityColorPicker'
 import { ActivityIconPicker } from './ActivityIconPicker'
@@ -30,7 +29,7 @@ export function ActivityForm({
     initial?.color ?? CATEGORY_PALETTE[existingCount % CATEGORY_PALETTE.length]
   )
   const [icon, setIcon] = useState<string | null>(initial?.icon ?? null)
-  const [defaultIncrement, setDefaultIncrement] = useState(initial?.defaultIncrement ?? 1)
+  const defaultIncrement = initial?.defaultIncrement ?? 1
 
   const canSubmit = name.trim().length > 0
 
@@ -68,34 +67,6 @@ export function ActivityForm({
           Icon
         </label>
         <ActivityIconPicker value={icon} onChange={setIcon} />
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">
-          Quick-add amount
-        </label>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setDefaultIncrement((v) => Math.max(1, v - 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)]"
-            aria-label="Decrease"
-          >
-            <Minus size={14} />
-          </button>
-          <span className="w-8 text-center text-sm font-medium tabular-nums">
-            {defaultIncrement}
-          </span>
-          <button
-            type="button"
-            onClick={() => setDefaultIncrement((v) => Math.min(99, v + 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)]"
-            aria-label="Increase"
-          >
-            <Plus size={14} />
-          </button>
-          <span className="text-xs text-[var(--text-muted)]">per quick-add tap</span>
-        </div>
       </div>
 
       <div className="mt-2 flex justify-end gap-2">

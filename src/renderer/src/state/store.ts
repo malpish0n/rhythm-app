@@ -33,8 +33,14 @@ interface AppState {
   setCategoryFilter: (filter: CategoryFilter) => void
   themeId: string
   setThemeId: (themeId: string) => void
+  themeMode: 'system' | 'manual'
+  setThemeMode: (mode: 'system' | 'manual') => void
+  favoriteThemeIds: string[]
+  toggleFavoriteTheme: (id: string) => void
   dockIconStyle: DockIconStyle
   setDockIconStyle: (style: DockIconStyle) => void
+  heatmapColor: string | null // null = follow the current theme's accent color
+  setHeatmapColor: (color: string | null) => void
   refreshToken: number
   bumpRefreshToken: () => void
   activityDialogOpen: boolean
@@ -57,6 +63,17 @@ const now = new Date()
 const REDUCE_MOTION_KEY = 'rhythm:reduceMotion'
 const FONT_KEY = 'rhythm:fontId'
 const TIME_FORMAT_KEY = 'rhythm:timeFormat'
+const FAVORITE_THEMES_KEY = 'rhythm:favoriteThemes'
+const HEATMAP_COLOR_KEY = 'rhythm:heatmapColor'
+
+function loadFavoriteThemes(): string[] {
+  try {
+    const raw = localStorage.getItem(FAVORITE_THEMES_KEY)
+    return raw ? (JSON.parse(raw) as string[]) : []
+  } catch {
+    return []
+  }
+}
 const initialCustomTheme = loadCustomTheme()
 
 export const useAppStore = create<AppState>((set) => ({
@@ -78,8 +95,25 @@ export const useAppStore = create<AppState>((set) => ({
   setCategoryFilter: (categoryFilter) => set({ categoryFilter }),
   themeId: 'deep-space',
   setThemeId: (themeId) => set({ themeId }),
+  themeMode: 'manual',
+  setThemeMode: (themeMode) => set({ themeMode }),
+  favoriteThemeIds: loadFavoriteThemes(),
+  toggleFavoriteTheme: (id) =>
+    set((state) => {
+      const next = state.favoriteThemeIds.includes(id)
+        ? state.favoriteThemeIds.filter((f) => f !== id)
+        : [...state.favoriteThemeIds, id]
+      localStorage.setItem(FAVORITE_THEMES_KEY, JSON.stringify(next))
+      return { favoriteThemeIds: next }
+    }),
   dockIconStyle: 'light',
   setDockIconStyle: (dockIconStyle) => set({ dockIconStyle }),
+  heatmapColor: localStorage.getItem(HEATMAP_COLOR_KEY),
+  setHeatmapColor: (heatmapColor) => {
+    if (heatmapColor) localStorage.setItem(HEATMAP_COLOR_KEY, heatmapColor)
+    else localStorage.removeItem(HEATMAP_COLOR_KEY)
+    set({ heatmapColor })
+  },
   refreshToken: 0,
   bumpRefreshToken: () => set((s) => ({ refreshToken: s.refreshToken + 1 })),
   activityDialogOpen: false,

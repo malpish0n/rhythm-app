@@ -27,6 +27,11 @@ export const CHANNELS = {
     skipOccurrence: 'plans:skipOccurrence',
     unskipOccurrence: 'plans:unskipOccurrence'
   },
+  dayNotes: {
+    listByRange: 'dayNotes:listByRange',
+    upsert: 'dayNotes:upsert',
+    delete: 'dayNotes:delete'
+  },
   app: {
     getTheme: 'app:getTheme',
     setTheme: 'app:setTheme',

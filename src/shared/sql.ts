@@ -3,14 +3,20 @@ import migration002 from './migrations/002_add_increment.sql?raw'
 import migration003 from './migrations/003_unique_activity_date.sql?raw'
 import migration004 from './migrations/004_plan_rules.sql?raw'
 import migration005 from './migrations/005_log_entry_time.sql?raw'
-import type { Activity, LogEntry, PlanRule, StreakResult } from './types'
+import migration006 from './migrations/006_plan_rule_time.sql?raw'
+import migration007 from './migrations/007_log_entry_end_time.sql?raw'
+import migration008 from './migrations/008_day_notes.sql?raw'
+import type { Activity, DayNote, LogEntry, PlanRule, StreakResult } from './types'
 
 export const MIGRATIONS: { version: number; sql: string }[] = [
   { version: 1, sql: migration001 },
   { version: 2, sql: migration002 },
   { version: 3, sql: migration003 },
   { version: 4, sql: migration004 },
-  { version: 5, sql: migration005 }
+  { version: 5, sql: migration005 },
+  { version: 6, sql: migration006 },
+  { version: 7, sql: migration007 },
+  { version: 8, sql: migration008 }
 ]
 
 export const SQL = {
@@ -41,7 +47,7 @@ export const SQL = {
     insert: `INSERT INTO log_entries (id, activity_id, date, count, note, created_at, time)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
     getById: 'SELECT * FROM log_entries WHERE id = ?',
-    updateNoteCount: 'UPDATE log_entries SET note = ?, count = ? WHERE id = ?',
+    updateNoteCount: 'UPDATE log_entries SET note = ?, count = ?, time = ?, end_time = ? WHERE id = ?',
     lastForActivityDate: `SELECT id FROM log_entries WHERE activity_id = ? AND date = ?
        ORDER BY created_at DESC LIMIT 1`,
     delete: 'DELETE FROM log_entries WHERE id = ?',
@@ -53,10 +59,10 @@ export const SQL = {
   },
   planRules: {
     listAll: 'SELECT * FROM plan_rules ORDER BY created_at ASC',
-    insert: `INSERT INTO plan_rules (id, activity_id, frequency, start_date, end_date, interval, weekdays, note, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    insert: `INSERT INTO plan_rules (id, activity_id, frequency, start_date, end_date, interval, weekdays, start_time, end_time, note, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     getById: 'SELECT * FROM plan_rules WHERE id = ?',
-    update: `UPDATE plan_rules SET frequency = ?, start_date = ?, end_date = ?, interval = ?, weekdays = ?, note = ?
+    update: `UPDATE plan_rules SET frequency = ?, start_date = ?, end_date = ?, interval = ?, weekdays = ?, start_time = ?, end_time = ?, note = ?
               WHERE id = ?`,
     delete: 'DELETE FROM plan_rules WHERE id = ?'
   },
@@ -64,6 +70,12 @@ export const SQL = {
     listAll: 'SELECT * FROM plan_exceptions',
     insert: 'INSERT OR IGNORE INTO plan_exceptions (id, plan_rule_id, date) VALUES (?, ?, ?)',
     delete: 'DELETE FROM plan_exceptions WHERE plan_rule_id = ? AND date = ?'
+  },
+  dayNotes: {
+    listByRange: 'SELECT * FROM day_notes WHERE date BETWEEN ? AND ? ORDER BY date ASC',
+    upsert: `INSERT INTO day_notes (date, content, updated_at) VALUES (?, ?, ?)
+             ON CONFLICT(date) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at`,
+    delete: 'DELETE FROM day_notes WHERE date = ?'
   }
 } as const
 
@@ -86,6 +98,7 @@ export interface LogEntryRow {
   note: string | null
   created_at: string
   time: string | null
+  end_time: string | null
 }
 
 export function toActivity(row: ActivityRow): Activity {
@@ -109,6 +122,8 @@ export interface PlanRuleRow {
   end_date: string | null
   interval: number
   weekdays: string | null
+  start_time: string | null
+  end_time: string | null
   note: string | null
   created_at: string
 }
@@ -128,6 +143,8 @@ export function toPlanRule(row: PlanRuleRow, skippedDates: string[]): PlanRule {
     endDate: row.end_date,
     interval: row.interval,
     weekdays: row.weekdays ? (JSON.parse(row.weekdays) as number[]) : [],
+    startTime: row.start_time,
+    endTime: row.end_time,
     note: row.note,
     createdAt: row.created_at,
     skippedDates
@@ -142,7 +159,22 @@ export function toLogEntry(row: LogEntryRow): LogEntry {
     count: row.count,
     note: row.note,
     createdAt: row.created_at,
-    time: row.time
+    time: row.time,
+    endTime: row.end_time
+  }
+}
+
+export interface DayNoteRow {
+  date: string
+  content: string
+  updated_at: string
+}
+
+export function toDayNote(row: DayNoteRow): DayNote {
+  return {
+    date: row.date,
+    content: row.content,
+    updatedAt: row.updated_at
   }
 }
 

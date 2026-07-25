@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { HourGrid } from './HourGrid'
+import { HourGrid, type PlannedRangeItem } from './HourGrid'
 import { usePlanRules } from '@renderer/hooks/usePlanRules'
 import { getOccurrencesInRange } from '@renderer/lib/planRecurrence'
 import { weekRange, todayIso } from '@renderer/lib/date'
@@ -56,6 +56,25 @@ export function WeekView({
     [planRules, start, end]
   )
 
+  const timedPlannedRanges = useMemo<PlannedRangeItem[]>(() => {
+    const result: PlannedRangeItem[] = []
+    for (const [date, rules] of plannedByDate) {
+      const loggedIds = new Set((entriesByDate.get(date) ?? []).map((e) => e.activityId))
+      for (const rule of rules) {
+        if (!rule.startTime || !rule.endTime) continue
+        if (loggedIds.has(rule.activityId)) continue
+        result.push({
+          ruleId: rule.id,
+          date,
+          activityId: rule.activityId,
+          startTime: rule.startTime,
+          endTime: rule.endTime
+        })
+      }
+    }
+    return result
+  }, [plannedByDate, entriesByDate])
+
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [dragOverDate, setDragOverDate] = useState<string | null>(null)
   const today = todayIso()
@@ -81,7 +100,9 @@ export function WeekView({
             <p className="mb-2 text-xs font-medium text-[var(--text-muted)]">Planned this week</p>
             <div className="grid grid-cols-7 gap-1 sm:gap-2">
               {days.map((date) => {
-                const rulesToday = plannedByDate.get(date) ?? []
+                const rulesToday = (plannedByDate.get(date) ?? []).filter(
+                  (r) => !r.startTime
+                )
                 const loggedIds = new Set(
                   (entriesByDate.get(date) ?? []).map((e) => e.activityId)
                 )
@@ -151,6 +172,7 @@ export function WeekView({
               entriesByDate={entriesByDate}
               activities={activities}
               timeFormat={timeFormat}
+              plannedRanges={timedPlannedRanges}
               onDayClick={setSelectedDate}
             />
           </div>

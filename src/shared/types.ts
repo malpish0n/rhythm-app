@@ -17,12 +17,19 @@ export interface LogEntry {
   note: string | null
   createdAt: string
   time: string | null // 'HH:MM' 24h, null for untimed/legacy entries
+  endTime: string | null // 'HH:MM' 24h, null when the entry has no duration
 }
 
 export interface DayAggregate {
   date: string
   activityId: string
   total: number
+}
+
+export interface DayNote {
+  date: string // 'YYYY-MM-DD'
+  content: string
+  updatedAt: string
 }
 
 export interface ActivityTotals {
@@ -57,9 +64,11 @@ export interface UpdateActivityInput {
 export interface UpdateLogEntryInput {
   note?: string | null
   count?: number
+  time?: string | null
+  endTime?: string | null
 }
 
-export type PlanFrequency = 'once' | 'daily' | 'weekly'
+export type PlanFrequency = 'once' | 'daily' | 'weekly' | 'monthly'
 
 export interface PlanRule {
   id: string
@@ -69,6 +78,8 @@ export interface PlanRule {
   endDate: string | null
   interval: number
   weekdays: number[] // 0-6 (Sun-Sat), only meaningful for 'weekly'
+  startTime: string | null // 'HH:MM' 24h, null for all-day
+  endTime: string | null // 'HH:MM' 24h, null for all-day
   note: string | null
   createdAt: string
   skippedDates: string[]
@@ -81,6 +92,8 @@ export interface CreatePlanRuleInput {
   endDate?: string | null
   interval?: number
   weekdays?: number[]
+  startTime?: string | null
+  endTime?: string | null
   note?: string | null
 }
 
@@ -90,6 +103,8 @@ export interface UpdatePlanRuleInput {
   endDate?: string | null
   interval?: number
   weekdays?: number[]
+  startTime?: string | null
+  endTime?: string | null
   note?: string | null
 }
 
@@ -125,6 +140,11 @@ export interface ActivityApi {
     delete(id: string): Promise<void>
     skipOccurrence(planRuleId: string, date: string): Promise<void>
     unskipOccurrence(planRuleId: string, date: string): Promise<void>
+  }
+  dayNotes: {
+    listByRange(startDate: string, endDate: string): Promise<DayNote[]>
+    upsert(date: string, content: string): Promise<DayNote>
+    delete(date: string): Promise<void>
   }
   app: {
     getTheme(): Promise<ThemePreference>

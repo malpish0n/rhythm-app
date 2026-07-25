@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { HourGrid } from './HourGrid'
+import { HourGrid, type PlannedRangeItem } from './HourGrid'
 import { DayAgenda } from './DayAgenda'
 import { useAppStore } from '@renderer/state/store'
+import { usePlanRules } from '@renderer/hooks/usePlanRules'
+import { expandPlanRule } from '@renderer/lib/planRecurrence'
 import { todayIso } from '@renderer/lib/date'
 import type { Activity, LogEntry } from '@shared/types'
 
@@ -26,6 +28,25 @@ export function DayView({ date, activities, refreshToken }: DayViewProps): JSX.E
     [date]
   )
 
+  const { planRules } = usePlanRules()
+  const plannedRanges = useMemo<PlannedRangeItem[]>(() => {
+    const loggedIds = new Set(entries.map((e) => e.activityId))
+    const result: PlannedRangeItem[] = []
+    for (const rule of planRules) {
+      if (!rule.startTime || !rule.endTime) continue
+      if (loggedIds.has(rule.activityId)) continue
+      if (expandPlanRule(rule, date, date).length === 0) continue
+      result.push({
+        ruleId: rule.id,
+        date,
+        activityId: rule.activityId,
+        startTime: rule.startTime,
+        endTime: rule.endTime
+      })
+    }
+    return result
+  }, [planRules, entries, date])
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -42,6 +63,7 @@ export function DayView({ date, activities, refreshToken }: DayViewProps): JSX.E
             entriesByDate={entriesByDate}
             activities={activities}
             timeFormat={timeFormat}
+            plannedRanges={plannedRanges}
           />
         </div>
 

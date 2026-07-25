@@ -9,12 +9,26 @@ export interface HourGridColumn {
   isToday: boolean
 }
 
+export interface PlannedRangeItem {
+  ruleId: string
+  date: string
+  activityId: string
+  startTime: string // 'HH:MM'
+  endTime: string // 'HH:MM'
+}
+
 interface HourGridProps {
   columns: HourGridColumn[]
   entriesByDate: Map<string, LogEntry[]>
   activities: Activity[]
   timeFormat: TimeFormat
+  plannedRanges?: PlannedRangeItem[]
   onDayClick?: (date: string) => void
+}
+
+function timeToHourFraction(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  return h + m / 60
 }
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
@@ -25,6 +39,7 @@ export function HourGrid({
   entriesByDate,
   activities,
   timeFormat,
+  plannedRanges = [],
   onDayClick
 }: HourGridProps): JSX.Element {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -65,6 +80,18 @@ export function HourGrid({
 
     return { allDayByDate: allDay, timedByKey: timed, hasAllDay: any }
   }, [columns, entriesByDate])
+
+  const plannedByStartKey = useMemo(() => {
+    const map = new Map<string, PlannedRangeItem[]>()
+    for (const item of plannedRanges) {
+      const startHour = Math.floor(timeToHourFraction(item.startTime))
+      const key = `${item.date}|${startHour}`
+      const list = map.get(key) ?? []
+      list.push(item)
+      map.set(key, list)
+    }
+    return map
+  }, [plannedRanges])
 
   const gridTemplateColumns = `3.5rem repeat(${columns.length}, 1fr)`
 
@@ -146,6 +173,21 @@ export function HourGrid({
                   {items.map((entry) => {
                     const activity = activities.find((a) => a.id === entry.activityId)
                     if (!activity) return null
+                    if (entry.endTime) {
+                      const startFrac = timeToHourFraction(entry.time!)
+                      const endFrac = timeToHourFraction(entry.endTime)
+                      const top = (startFrac - hour) * ROW_HEIGHT
+                      const height = Math.max(18, (endFrac - startFrac) * ROW_HEIGHT - 2)
+                      return (
+                        <div
+                          key={entry.id}
+                          className="absolute inset-x-1 z-[5] overflow-hidden truncate rounded px-1.5 py-0.5 text-[10px] font-medium text-white"
+                          style={{ top, height, backgroundColor: activity.color }}
+                        >
+                          {formatEntryTime(entry.time!, timeFormat)} {activity.name}
+                        </div>
+                      )
+                    }
                     return (
                       <div
                         key={entry.id}
@@ -153,6 +195,29 @@ export function HourGrid({
                         style={{ backgroundColor: activity.color }}
                       >
                         {formatEntryTime(entry.time!, timeFormat)} {activity.name}
+                      </div>
+                    )
+                  })}
+                  {(plannedByStartKey.get(`${col.date}|${hour}`) ?? []).map((item) => {
+                    const activity = activities.find((a) => a.id === item.activityId)
+                    if (!activity) return null
+                    const startFrac = timeToHourFraction(item.startTime)
+                    const endFrac = timeToHourFraction(item.endTime)
+                    const top = (startFrac - hour) * ROW_HEIGHT
+                    const height = Math.max(18, (endFrac - startFrac) * ROW_HEIGHT - 2)
+                    return (
+                      <div
+                        key={item.ruleId}
+                        className="absolute inset-x-1 z-[5] overflow-hidden truncate rounded border border-dashed px-1.5 py-0.5 text-[10px] font-medium"
+                        style={{
+                          top,
+                          height,
+                          backgroundColor: `${activity.color}22`,
+                          borderColor: activity.color,
+                          color: activity.color
+                        }}
+                      >
+                        {formatEntryTime(item.startTime, timeFormat)} {activity.name}
                       </div>
                     )
                   })}

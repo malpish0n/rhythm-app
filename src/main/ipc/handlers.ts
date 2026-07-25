@@ -3,6 +3,7 @@ import { CHANNELS } from './channels'
 import * as activitiesRepo from '../db/repositories/activitiesRepo'
 import * as logEntriesRepo from '../db/repositories/logEntriesRepo'
 import * as planRulesRepo from '../db/repositories/planRulesRepo'
+import * as dayNotesRepo from '../db/repositories/dayNotesRepo'
 import * as prefsRepo from '../db/repositories/prefsRepo'
 import { applyDockIcon } from '../dockIcon'
 import type {
@@ -73,6 +74,14 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(CHANNELS.plans.unskipOccurrence, (_e, planRuleId: string, date: string) =>
     planRulesRepo.unskipOccurrence(planRuleId, date)
   )
+
+  ipcMain.handle(CHANNELS.dayNotes.listByRange, (_e, startDate: string, endDate: string) =>
+    dayNotesRepo.listByRange(startDate, endDate)
+  )
+  ipcMain.handle(CHANNELS.dayNotes.upsert, (_e, date: string, content: string) =>
+    dayNotesRepo.upsert(date, content)
+  )
+  ipcMain.handle(CHANNELS.dayNotes.delete, (_e, date: string) => dayNotesRepo.remove(date))
 
   ipcMain.handle(CHANNELS.app.getTheme, () => prefsRepo.getTheme())
   ipcMain.handle(CHANNELS.app.setTheme, (_e, theme: ThemePreference) => prefsRepo.setTheme(theme))

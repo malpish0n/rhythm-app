@@ -5,6 +5,7 @@ import {
   toActivity,
   toLogEntry,
   toPlanRule,
+  toDayNote,
   todayIso,
   computeStreak
 } from '@shared/sql'
@@ -196,10 +197,12 @@ export function createCapacitorApi(): ActivityApi {
 
         const note = patch.note !== undefined ? patch.note : existing.note
         const count = patch.count ?? existing.count
+        const time = patch.time !== undefined ? patch.time : existing.time
+        const endTime = patch.endTime !== undefined ? patch.endTime : existing.end_time
 
-        await db.run(SQL.logEntries.updateNoteCount, [note, count, id])
+        await db.run(SQL.logEntries.updateNoteCount, [note, count, time, endTime, id])
 
-        return toLogEntry({ ...existing, note, count })
+        return toLogEntry({ ...existing, note, count, time, end_time: endTime })
       },
       async undoLast(activityId: string, date: string): Promise<void> {
         const db = await getDb()
@@ -260,6 +263,8 @@ export function createCapacitorApi(): ActivityApi {
           input.endDate ?? null,
           input.interval ?? 1,
           input.weekdays ? JSON.stringify(input.weekdays) : null,
+          input.startTime ?? null,
+          input.endTime ?? null,
           input.note ?? null,
           createdAt
         ])
@@ -280,6 +285,8 @@ export function createCapacitorApi(): ActivityApi {
           interval: patch.interval ?? existing.interval,
           weekdays:
             patch.weekdays !== undefined ? JSON.stringify(patch.weekdays) : existing.weekdays,
+          start_time: patch.startTime !== undefined ? patch.startTime : existing.start_time,
+          end_time: patch.endTime !== undefined ? patch.endTime : existing.end_time,
           note: patch.note !== undefined ? patch.note : existing.note
         }
 
@@ -289,6 +296,8 @@ export function createCapacitorApi(): ActivityApi {
           next.end_date,
           next.interval,
           next.weekdays,
+          next.start_time,
+          next.end_time,
           next.note,
           id
         ])
@@ -311,6 +320,27 @@ export function createCapacitorApi(): ActivityApi {
       async unskipOccurrence(planRuleId: string, date: string): Promise<void> {
         const db = await getDb()
         await db.run(SQL.planExceptions.delete, [planRuleId, date])
+      }
+    },
+    dayNotes: {
+      async listByRange(startDate: string, endDate: string) {
+        const db = await getDb()
+        const res = await db.query(SQL.dayNotes.listByRange, [startDate, endDate])
+        return (res.values ?? []).map(toDayNote)
+      },
+      async upsert(date: string, content: string) {
+        const db = await getDb()
+        const updatedAt = new Date().toISOString()
+        if (content.trim() === '') {
+          await db.run(SQL.dayNotes.delete, [date])
+          return { date, content: '', updatedAt }
+        }
+        await db.run(SQL.dayNotes.upsert, [date, content, updatedAt])
+        return { date, content, updatedAt }
+      },
+      async delete(date: string): Promise<void> {
+        const db = await getDb()
+        await db.run(SQL.dayNotes.delete, [date])
       }
     },
     app: {

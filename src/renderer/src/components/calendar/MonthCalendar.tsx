@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { NotebookPen } from 'lucide-react'
 import { useMonthMatrix } from '@renderer/hooks/useMonthMatrix'
 import { usePlanRules } from '@renderer/hooks/usePlanRules'
 import { getOccurrencesInRange } from '@renderer/lib/planRecurrence'
@@ -41,6 +42,14 @@ export function MonthCalendar({
     const { start, end } = monthRange(year, month)
     return getOccurrencesInRange(planRules, start, end)
   }, [planRules, year, month])
+
+  const [noteDates, setNoteDates] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    const { start, end } = monthRange(year, month)
+    window.api.dayNotes.listByRange(start, end).then((rows) => {
+      setNoteDates(new Set(rows.map((r) => r.date)))
+    })
+  }, [year, month, refreshToken])
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [dragOverDate, setDragOverDate] = useState<string | null>(null)
@@ -127,12 +136,17 @@ export function MonthCalendar({
                       opacity: day.inMonth ? 1 : 0.4
                     }}
                   >
-                    <span
-                      className="text-xs font-medium tabular-nums"
-                      style={{ color: isToday ? 'var(--accent)' : 'var(--text)' }}
-                    >
-                      {dayNumber}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-xs font-medium tabular-nums"
+                        style={{ color: isToday ? 'var(--accent)' : 'var(--text)' }}
+                      >
+                        {dayNumber}
+                      </span>
+                      {noteDates.has(day.date) && (
+                        <NotebookPen size={10} className="text-[var(--text-muted)]" />
+                      )}
+                    </div>
                     {!activeActivity && (loggedIds.size > 0 || plannedIds.length > 0) && (
                       <div className="flex flex-wrap gap-1">
                         {visibleLogged.map((activityId) => {

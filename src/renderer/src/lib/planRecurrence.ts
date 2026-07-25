@@ -58,6 +58,26 @@ export function expandPlanRule(rule: PlanRule, rangeStart: string, rangeEnd: str
     return occurrences
   }
 
+  if (rule.frequency === 'monthly') {
+    const interval = Math.max(1, rule.interval)
+    const targetDay = start.getDate()
+    const cursor = new Date(loopStart)
+
+    while (cursor <= loopEnd) {
+      if (cursor.getDate() === targetDay) {
+        const monthsSince =
+          (cursor.getFullYear() - start.getFullYear()) * 12 +
+          (cursor.getMonth() - start.getMonth())
+        if (monthsSince >= 0 && monthsSince % interval === 0) {
+          const iso = toIsoDate(cursor)
+          if (!skipped.has(iso)) occurrences.push(iso)
+        }
+      }
+      cursor.setDate(cursor.getDate() + 1)
+    }
+    return occurrences
+  }
+
   if (rule.frequency === 'weekly') {
     const interval = Math.max(1, rule.interval)
     const weekdays = new Set(rule.weekdays)

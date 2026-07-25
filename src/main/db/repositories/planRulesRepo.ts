@@ -35,6 +35,8 @@ export function create(input: CreatePlanRuleInput): PlanRule {
     input.endDate ?? null,
     input.interval ?? 1,
     input.weekdays ? JSON.stringify(input.weekdays) : null,
+    input.startTime ?? null,
+    input.endTime ?? null,
     input.note ?? null,
     createdAt
   )
@@ -57,6 +59,8 @@ export function update(id: string, patch: UpdatePlanRuleInput): PlanRule {
       patch.weekdays !== undefined
         ? JSON.stringify(patch.weekdays)
         : existing.weekdays,
+    start_time: patch.startTime !== undefined ? patch.startTime : existing.start_time,
+    end_time: patch.endTime !== undefined ? patch.endTime : existing.end_time,
     note: patch.note !== undefined ? patch.note : existing.note
   }
 
@@ -66,6 +70,8 @@ export function update(id: string, patch: UpdatePlanRuleInput): PlanRule {
     next.end_date,
     next.interval,
     next.weekdays,
+    next.start_time,
+    next.end_time,
     next.note,
     id
   )

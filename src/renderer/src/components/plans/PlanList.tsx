@@ -9,15 +9,23 @@ import type { Activity, PlanRule } from '@shared/types'
 const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function describe(rule: PlanRule): string {
+  let base: string
   if (rule.frequency === 'once') {
     const d = new Date(rule.startDate + 'T00:00:00')
-    return `On ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+    base = `On ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+  } else if (rule.frequency === 'daily') {
+    base = rule.interval === 1 ? 'Every day' : `Every ${rule.interval} days`
+  } else if (rule.frequency === 'monthly') {
+    const day = new Date(rule.startDate + 'T00:00:00').getDate()
+    base =
+      rule.interval === 1
+        ? `Every month on the ${day}`
+        : `Every ${rule.interval} months on the ${day}`
+  } else {
+    const days = [...rule.weekdays].sort().map((d) => WEEKDAY_SHORT[d]).join(', ')
+    base = rule.interval === 1 ? `Every week on ${days}` : `Every ${rule.interval} weeks on ${days}`
   }
-  if (rule.frequency === 'daily') {
-    return rule.interval === 1 ? 'Every day' : `Every ${rule.interval} days`
-  }
-  const days = [...rule.weekdays].sort().map((d) => WEEKDAY_SHORT[d]).join(', ')
-  return rule.interval === 1 ? `Every week on ${days}` : `Every ${rule.interval} weeks on ${days}`
+  return rule.startTime && rule.endTime ? `${base}, ${rule.startTime}–${rule.endTime}` : base
 }
 
 interface PlanListProps {
@@ -35,7 +43,9 @@ export function PlanList({ activities }: PlanListProps): JSX.Element | null {
     await updatePlan(rule.id, {
       frequency: value.frequency,
       interval: value.interval,
-      weekdays: value.frequency === 'weekly' ? value.weekdays : []
+      weekdays: value.frequency === 'weekly' ? value.weekdays : [],
+      startTime: value.startTime,
+      endTime: value.endTime
     })
     setEditingId(null)
   }
@@ -60,7 +70,10 @@ export function PlanList({ activities }: PlanListProps): JSX.Element | null {
                     initial={{
                       frequency: rule.frequency,
                       interval: rule.interval,
-                      weekdays: rule.weekdays
+                      weekdays: rule.weekdays,
+                      allDay: !rule.startTime,
+                      startTime: rule.startTime,
+                      endTime: rule.endTime
                     }}
                     onSave={(value) => handleSave(rule, value)}
                     onCancel={() => setEditingId(null)}

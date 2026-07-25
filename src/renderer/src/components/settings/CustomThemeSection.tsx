@@ -57,7 +57,7 @@ export function CustomThemeSection(): JSX.Element {
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={fastSpring}
-              className="absolute inset-0 flex items-center justify-center bg-black/30"
+              className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/30"
             >
               <Check size={16} className="text-white" />
             </motion.div>
@@ -66,7 +66,9 @@ export function CustomThemeSection(): JSX.Element {
 
         <div className="flex-1">
           <p className="text-sm font-medium">Your theme</p>
-          <p className="text-xs text-[var(--text-muted)]">Pick your own colors below</p>
+          <p className="text-xs text-[var(--text-muted)]">
+            Pick your own colors below — changes save automatically
+          </p>
         </div>
 
         <button

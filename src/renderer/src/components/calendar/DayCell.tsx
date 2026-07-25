@@ -9,13 +9,11 @@ interface DayCellProps {
   totals: DayTotals | undefined
   maxCount: number
   activeActivity: Activity | undefined
-  activities: Activity[]
+  heatmapColor: string
   onHover: (date: string, totals: DayTotals | undefined, e: React.MouseEvent) => void
   onLeave: () => void
   onClick: (date: string) => void
   index: number
-  width: number
-  height: number
 }
 
 export function DayCell({
@@ -24,16 +22,14 @@ export function DayCell({
   totals,
   maxCount,
   activeActivity,
-  activities,
+  heatmapColor,
   onHover,
   onLeave,
   onClick,
-  index,
-  width,
-  height
+  index
 }: DayCellProps): JSX.Element {
   if (!inYear) {
-    return <div style={{ height, width }} />
+    return <div className="aspect-square w-full" />
   }
 
   const count = totals?.total ?? 0
@@ -49,36 +45,19 @@ export function DayCell({
       onMouseEnter={(e) => onHover(date, totals, e)}
       onMouseLeave={onLeave}
       onClick={() => onClick(date)}
-      className="relative cursor-pointer rounded-[3px] bg-[var(--surface-2)]"
+      className="relative aspect-square w-full cursor-pointer rounded-[3px] bg-[var(--surface-2)]"
       style={{
-        height,
-        width,
         outline: isToday ? '1.5px solid var(--accent)' : undefined,
         outlineOffset: 1
       }}
     >
-      {activeActivity && count > 0 && (
+      {count > 0 && (
         <div
           className="absolute inset-0 rounded-[3px]"
-          style={{ backgroundColor: intensityRgba(count, maxCount, activeActivity.color) }}
+          style={{
+            backgroundColor: intensityRgba(count, maxCount, activeActivity?.color ?? heatmapColor)
+          }}
         />
-      )}
-      {!activeActivity && count > 0 && totals && (
-        <div className="absolute inset-0 flex overflow-hidden rounded-[3px]">
-          {Object.entries(totals.byActivity).map(([activityId, activityCount]) => {
-            const activity = activities.find((a) => a.id === activityId)
-            if (!activity) return null
-            return (
-              <div
-                key={activityId}
-                style={{
-                  backgroundColor: intensityRgba(activityCount, maxCount, activity.color),
-                  flex: 1
-                }}
-              />
-            )
-          })}
-        </div>
       )}
     </motion.div>
   )

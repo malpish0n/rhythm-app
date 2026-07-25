@@ -25,6 +25,7 @@ import { PlanList } from '@renderer/components/plans/PlanList'
 function App(): JSX.Element {
   const themeId = useAppStore((s) => s.themeId)
   const setThemeId = useAppStore((s) => s.setThemeId)
+  const setThemeMode = useAppStore((s) => s.setThemeMode)
   const setDockIconStyle = useAppStore((s) => s.setDockIconStyle)
   const year = useAppStore((s) => s.year)
   const setYear = useAppStore((s) => s.setYear)
@@ -67,9 +68,10 @@ function App(): JSX.Element {
             ? pref
             : DEFAULT_DARK_THEME
       setThemeId(resolved)
+      setThemeMode(pref === 'system' ? 'system' : 'manual')
     })
     window.api.app.getDockIconStyle().then(setDockIconStyle)
-  }, [setThemeId, setDockIconStyle])
+  }, [setThemeId, setThemeMode, setDockIconStyle])
 
   useEffect(() => {
     const isCustom = themeId === 'custom'

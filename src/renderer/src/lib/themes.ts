@@ -157,20 +157,6 @@ export const THEMES: ThemeDef[] = [
     }
   },
   {
-    id: 'deep-lagoon',
-    name: 'Deep Lagoon',
-    isDark: true,
-    colors: {
-      bg: '#0a090c',
-      surface: '#091f22',
-      surface2: '#07393c',
-      border: '#1b5258',
-      text: '#f0edee',
-      textMuted: '#b2e3ef',
-      accent: '#18c3ce'
-    }
-  },
-  {
     id: 'berry-cream',
     name: 'Berry Cream',
     isDark: false,
@@ -304,3 +290,8 @@ export const THEME_MAP: Record<string, ThemeDef> = Object.fromEntries(
 
 export const DEFAULT_DARK_THEME = 'deep-space'
 export const DEFAULT_LIGHT_THEME = 'berry-cream'
+
+export function resolveActiveAccent(themeId: string, customAccent: string): string {
+  if (themeId === 'custom') return customAccent
+  return THEME_MAP[themeId]?.colors.accent ?? THEME_MAP[DEFAULT_DARK_THEME].colors.accent
+}

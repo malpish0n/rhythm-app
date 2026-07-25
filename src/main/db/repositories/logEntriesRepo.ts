@@ -61,10 +61,12 @@ export function update(id: string, patch: UpdateLogEntryInput): LogEntry {
 
   const note = patch.note !== undefined ? patch.note : existing.note
   const count = patch.count ?? existing.count
+  const time = patch.time !== undefined ? patch.time : existing.time
+  const endTime = patch.endTime !== undefined ? patch.endTime : existing.end_time
 
-  db.prepare(SQL.logEntries.updateNoteCount).run(note, count, id)
+  db.prepare(SQL.logEntries.updateNoteCount).run(note, count, time, endTime, id)
 
-  return toLogEntry({ ...existing, note, count })
+  return toLogEntry({ ...existing, note, count, time, end_time: endTime })
 }
 
 export function undoLast(activityId: string, date: string): void {
