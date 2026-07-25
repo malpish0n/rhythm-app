@@ -1,0 +1,93 @@
+@import '@fontsource-variable/inter';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fallback palette (Olive Ember) shown before the theme effect in App.tsx applies
+   the user's actual selected theme via inline CSS variables. */
+:root {
+  --bg: #3f3f37;
+  --surface: #444134;
+  --surface-2: #494331;
+  --border: #9b4c27;
+  --text: #d6d6b1;
+  --text-muted: #a3a188;
+  --accent: #de541e;
+
+  --shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 1px 1px rgba(0, 0, 0, 0.04);
+  --shadow-md:
+    0 4px 10px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 1px 1px rgba(0, 0, 0, 0.04);
+  --shadow-lg:
+    0 16px 32px rgba(0, 0, 0, 0.14),
+    0 6px 12px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-feature-settings: 'tnum' 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.shadow-elevation-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-elevation-md {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-elevation-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.glass-surface {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass-surface {
+    background-color: color-mix(in srgb, var(--surface) 72%, transparent);
+    border-color: color-mix(in srgb, var(--border) 60%, transparent);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
+}

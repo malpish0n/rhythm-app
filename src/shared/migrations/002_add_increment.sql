@@ -1,0 +1,1 @@
+ALTER TABLE activities ADD COLUMN default_increment INTEGER NOT NULL DEFAULT 1;

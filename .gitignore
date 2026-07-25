@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-mobile
+out
+.DS_Store
+*.log
+build
+.env
+.env.*
+.vite
+
+# iOS (Capacitor) build products — ios/ source itself stays tracked
+ios/App/App/public
+ios/App/Pods
+ios/App/build
+ios/App/DerivedData
+ios/App/App.xcworkspace/xcuserdata
+ios/App/App.xcodeproj/xcuserdata
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata
