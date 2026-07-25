@@ -17,6 +17,34 @@ export interface ThemeDef {
 
 export const THEMES: ThemeDef[] = [
   {
+    id: 'rhythm-dark',
+    name: 'Rhythm Dark',
+    isDark: true,
+    colors: {
+      bg: '#080a12',
+      surface: '#1a2036',
+      surface2: '#252d4b',
+      border: '#2a3352',
+      text: '#f5f7fa',
+      textMuted: '#757f9a',
+      accent: '#ff7a5a'
+    }
+  },
+  {
+    id: 'rhythm-light',
+    name: 'Rhythm Light',
+    isDark: false,
+    colors: {
+      bg: '#f8fafc',
+      surface: '#ffffff',
+      surface2: '#f1f5f9',
+      border: '#e2e8f0',
+      text: '#1a2036',
+      textMuted: '#64748b',
+      accent: '#ff7a5a'
+    }
+  },
+  {
     id: 'amber-earth',
     name: 'Amber Earth',
     isDark: true,
@@ -239,6 +267,34 @@ export const THEMES: ThemeDef[] = [
       textMuted: '#a3a188',
       accent: '#de541e'
     }
+  },
+  {
+    id: 'pine-depths',
+    name: 'Pine Depths',
+    isDark: true,
+    colors: {
+      bg: '#1f2421',
+      surface: '#204341',
+      surface2: '#216869',
+      border: '#378771',
+      text: '#dce1de',
+      textMuted: '#b2cfb6',
+      accent: '#49a078'
+    }
+  },
+  {
+    id: 'deep-space',
+    name: 'Deep Space',
+    isDark: true,
+    colors: {
+      bg: '#080a12',
+      surface: '#1a2036',
+      surface2: '#333b52',
+      border: '#515972',
+      text: '#f5f7fa',
+      textMuted: '#757f9a',
+      accent: '#22d3ee'
+    }
   }
 ]
 
@@ -246,5 +302,5 @@ export const THEME_MAP: Record<string, ThemeDef> = Object.fromEntries(
   THEMES.map((t) => [t.id, t])
 )
 
-export const DEFAULT_DARK_THEME = 'olive-ember'
+export const DEFAULT_DARK_THEME = 'deep-space'
 export const DEFAULT_LIGHT_THEME = 'berry-cream'

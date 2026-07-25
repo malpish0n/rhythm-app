@@ -4,6 +4,7 @@ import { CalendarPlus } from 'lucide-react'
 import { useAppStore } from '@renderer/state/store'
 import { useActivities } from '@renderer/hooks/useActivities'
 import { DEFAULT_DARK_THEME, DEFAULT_LIGHT_THEME, THEME_MAP } from '@renderer/lib/themes'
+import { FONT_MAP, DEFAULT_FONT } from '@renderer/lib/fonts'
 import { Sidebar } from '@renderer/components/layout/Sidebar'
 import { ContentHeader } from '@renderer/components/layout/ContentHeader'
 import { MobileBottomBar } from '@renderer/components/layout/MobileBottomBar'
@@ -13,6 +14,7 @@ import { StatsPanel } from '@renderer/components/stats/StatsPanel'
 import { TodayCard } from '@renderer/components/stats/TodayCard'
 import { SummaryView } from '@renderer/components/stats/SummaryView'
 import { ActivityManagerDialog } from '@renderer/components/activities/ActivityManagerDialog'
+import { SettingsDialog } from '@renderer/components/settings/SettingsDialog'
 import { QuickAddFab } from '@renderer/components/quickadd/QuickAddFab'
 import { PlanList } from '@renderer/components/plans/PlanList'
 
@@ -30,6 +32,10 @@ function App(): JSX.Element {
   const refreshToken = useAppStore((s) => s.refreshToken)
   const activityDialogOpen = useAppStore((s) => s.activityDialogOpen)
   const setActivityDialogOpen = useAppStore((s) => s.setActivityDialogOpen)
+  const settingsOpen = useAppStore((s) => s.settingsOpen)
+  const setSettingsOpen = useAppStore((s) => s.setSettingsOpen)
+  const reduceMotion = useAppStore((s) => s.reduceMotion)
+  const fontId = useAppStore((s) => s.fontId)
 
   const { activities } = useActivities()
   const [activityDialogStartNew, setActivityDialogStartNew] = useState(false)
@@ -67,6 +73,11 @@ function App(): JSX.Element {
     root.style.colorScheme = theme.isDark ? 'dark' : 'light'
   }, [themeId])
 
+  useEffect(() => {
+    const font = FONT_MAP[fontId] ?? FONT_MAP[DEFAULT_FONT]
+    document.documentElement.style.setProperty('--font-sans', font.stack)
+  }, [fontId])
+
   const goPrevMonth = (): void => {
     let { year: y, month: m } = monthCursor
     m -= 1
@@ -99,6 +110,10 @@ function App(): JSX.Element {
     setActivityDialogOpen(true)
   }
 
+  const openSettings = (): void => {
+    setSettingsOpen(true)
+  }
+
   if (apiMissing) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-[var(--bg)] text-[var(--text)]">
@@ -110,7 +125,7 @@ function App(): JSX.Element {
   }
 
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
       <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
         <Sidebar
           viewMode={viewMode}
@@ -119,6 +134,7 @@ function App(): JSX.Element {
           categoryFilter={categoryFilter}
           onCategoryFilterChange={setCategoryFilter}
           onManageCategories={openCategoryManager}
+          onOpenSettings={openSettings}
         />
 
         <main className="lg:pl-60">
@@ -208,6 +224,8 @@ function App(): JSX.Element {
           onClose={() => setActivityDialogOpen(false)}
         />
 
+        <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
         <MobileBottomBar
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -215,6 +233,7 @@ function App(): JSX.Element {
           categoryFilter={categoryFilter}
           onCategoryFilterChange={setCategoryFilter}
           onManageCategories={openCategoryManager}
+          onOpenSettings={openSettings}
         />
 
         <QuickAddFab onClick={openNewCategory} />
