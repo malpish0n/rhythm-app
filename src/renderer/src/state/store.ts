@@ -1,9 +1,13 @@
 import { create } from 'zustand'
 import { DEFAULT_FONT } from '@renderer/lib/fonts'
-import type { Activity, PlanRule } from '@shared/types'
+import { todayIso } from '@renderer/lib/date'
+import { loadCustomTheme, saveCustomTheme } from '@renderer/lib/customTheme'
+import type { TimeFormat } from '@renderer/lib/time'
+import type { ThemeColors } from '@renderer/lib/themes'
+import type { Activity, DockIconStyle, PlanRule } from '@shared/types'
 
 export type CategoryFilter = 'all' | string
-export type ViewMode = 'month' | 'heatmap' | 'summary'
+export type CalendarFormat = 'day' | 'week' | 'month'
 
 export interface MonthCursor {
   year: number
@@ -11,8 +15,12 @@ export interface MonthCursor {
 }
 
 interface AppState {
-  viewMode: ViewMode
-  setViewMode: (mode: ViewMode) => void
+  calendarFormat: CalendarFormat
+  setCalendarFormat: (format: CalendarFormat) => void
+  dayCursor: string
+  setDayCursor: (date: string) => void
+  weekCursor: string
+  setWeekCursor: (date: string) => void
   monthCursor: MonthCursor
   setMonthCursor: (cursor: MonthCursor) => void
   activities: Activity[]
@@ -25,6 +33,8 @@ interface AppState {
   setCategoryFilter: (filter: CategoryFilter) => void
   themeId: string
   setThemeId: (themeId: string) => void
+  dockIconStyle: DockIconStyle
+  setDockIconStyle: (style: DockIconStyle) => void
   refreshToken: number
   bumpRefreshToken: () => void
   activityDialogOpen: boolean
@@ -35,15 +45,27 @@ interface AppState {
   setReduceMotion: (value: boolean) => void
   fontId: string
   setFontId: (fontId: string) => void
+  timeFormat: TimeFormat
+  setTimeFormat: (timeFormat: TimeFormat) => void
+  customThemeColors: ThemeColors
+  setCustomThemeColor: (key: keyof ThemeColors, value: string) => void
+  customThemeIsDark: boolean
+  setCustomThemeIsDark: (isDark: boolean) => void
 }
 
 const now = new Date()
 const REDUCE_MOTION_KEY = 'rhythm:reduceMotion'
 const FONT_KEY = 'rhythm:fontId'
+const TIME_FORMAT_KEY = 'rhythm:timeFormat'
+const initialCustomTheme = loadCustomTheme()
 
 export const useAppStore = create<AppState>((set) => ({
-  viewMode: 'month',
-  setViewMode: (viewMode) => set({ viewMode }),
+  calendarFormat: 'month',
+  setCalendarFormat: (calendarFormat) => set({ calendarFormat }),
+  dayCursor: todayIso(),
+  setDayCursor: (dayCursor) => set({ dayCursor }),
+  weekCursor: todayIso(),
+  setWeekCursor: (weekCursor) => set({ weekCursor }),
   monthCursor: { year: now.getFullYear(), month: now.getMonth() },
   setMonthCursor: (monthCursor) => set({ monthCursor }),
   activities: [],
@@ -56,6 +78,8 @@ export const useAppStore = create<AppState>((set) => ({
   setCategoryFilter: (categoryFilter) => set({ categoryFilter }),
   themeId: 'deep-space',
   setThemeId: (themeId) => set({ themeId }),
+  dockIconStyle: 'light',
+  setDockIconStyle: (dockIconStyle) => set({ dockIconStyle }),
   refreshToken: 0,
   bumpRefreshToken: () => set((s) => ({ refreshToken: s.refreshToken + 1 })),
   activityDialogOpen: false,
@@ -71,5 +95,23 @@ export const useAppStore = create<AppState>((set) => ({
   setFontId: (fontId) => {
     localStorage.setItem(FONT_KEY, fontId)
     set({ fontId })
-  }
+  },
+  timeFormat: (localStorage.getItem(TIME_FORMAT_KEY) as TimeFormat | null) ?? 'system',
+  setTimeFormat: (timeFormat) => {
+    localStorage.setItem(TIME_FORMAT_KEY, timeFormat)
+    set({ timeFormat })
+  },
+  customThemeColors: initialCustomTheme.colors,
+  setCustomThemeColor: (key, value) =>
+    set((s) => {
+      const customThemeColors = { ...s.customThemeColors, [key]: value }
+      saveCustomTheme({ colors: customThemeColors, isDark: s.customThemeIsDark })
+      return { customThemeColors }
+    }),
+  customThemeIsDark: initialCustomTheme.isDark,
+  setCustomThemeIsDark: (customThemeIsDark) =>
+    set((s) => {
+      saveCustomTheme({ colors: s.customThemeColors, isDark: customThemeIsDark })
+      return { customThemeIsDark }
+    })
 }))

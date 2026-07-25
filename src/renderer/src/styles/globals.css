@@ -101,3 +101,25 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--text-muted);
 }
+
+.color-swatch-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  padding: 0;
+  border-radius: 9999px;
+  cursor: pointer;
+  background: none;
+}
+
+.color-swatch-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 9999px;
+}
+
+.color-swatch-input::-webkit-color-swatch {
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+}

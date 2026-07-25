@@ -14,6 +14,8 @@ interface DayCellProps {
   onLeave: () => void
   onClick: (date: string) => void
   index: number
+  width: number
+  height: number
 }
 
 export function DayCell({
@@ -26,10 +28,12 @@ export function DayCell({
   onHover,
   onLeave,
   onClick,
-  index
+  index,
+  width,
+  height
 }: DayCellProps): JSX.Element {
   if (!inYear) {
-    return <div className="h-[13px] w-[13px]" />
+    return <div style={{ height, width }} />
   }
 
   const count = totals?.total ?? 0
@@ -40,13 +44,18 @@ export function DayCell({
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2, delay: Math.min(index * 0.0015, 0.3) }}
-      whileHover={{ scale: 1.35, zIndex: 10 }}
-      whileTap={{ scale: 0.85 }}
+      whileHover={{ scale: 1.25, zIndex: 10 }}
+      whileTap={{ scale: 0.9 }}
       onMouseEnter={(e) => onHover(date, totals, e)}
       onMouseLeave={onLeave}
       onClick={() => onClick(date)}
-      className="relative h-[13px] w-[13px] cursor-pointer rounded-[3px] bg-[var(--surface-2)]"
-      style={{ outline: isToday ? '1.5px solid var(--accent)' : undefined, outlineOffset: 1 }}
+      className="relative cursor-pointer rounded-[3px] bg-[var(--surface-2)]"
+      style={{
+        height,
+        width,
+        outline: isToday ? '1.5px solid var(--accent)' : undefined,
+        outlineOffset: 1
+      }}
     >
       {activeActivity && count > 0 && (
         <div

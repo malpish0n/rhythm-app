@@ -4,9 +4,11 @@ import * as activitiesRepo from '../db/repositories/activitiesRepo'
 import * as logEntriesRepo from '../db/repositories/logEntriesRepo'
 import * as planRulesRepo from '../db/repositories/planRulesRepo'
 import * as prefsRepo from '../db/repositories/prefsRepo'
+import { applyDockIcon } from '../dockIcon'
 import type {
   CreateActivityInput,
   CreatePlanRuleInput,
+  DockIconStyle,
   ThemePreference,
   UpdateActivityInput,
   UpdateLogEntryInput,
@@ -74,4 +76,9 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle(CHANNELS.app.getTheme, () => prefsRepo.getTheme())
   ipcMain.handle(CHANNELS.app.setTheme, (_e, theme: ThemePreference) => prefsRepo.setTheme(theme))
+  ipcMain.handle(CHANNELS.app.getDockIconStyle, () => prefsRepo.getDockIconStyle())
+  ipcMain.handle(CHANNELS.app.setDockIconStyle, (_e, style: DockIconStyle) => {
+    prefsRepo.setDockIconStyle(style)
+    applyDockIcon(style)
+  })
 }

@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Info, Palette, SlidersHorizontal, X } from 'lucide-react'
+import { Bell, Info, Palette, SlidersHorizontal, X } from 'lucide-react'
 import { AppearanceTab } from './AppearanceTab'
 import { GeneralTab } from './GeneralTab'
+import { NotificationsTab } from './NotificationsTab'
 import { AboutTab } from './AboutTab'
 import { fade, sliderSpring } from '@renderer/lib/motionPresets'
 
-type SettingsTab = 'appearance' | 'general' | 'about'
+type SettingsTab = 'appearance' | 'general' | 'notifications' | 'about'
 
 const TABS: { id: SettingsTab; label: string; icon: typeof Palette }[] = [
   { id: 'general', label: 'General', icon: SlidersHorizontal },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'about', label: 'About', icon: Info }
 ]
@@ -83,6 +85,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps): JSX.Elem
               <div className="flex-1 overflow-y-auto p-5">
                 {tab === 'appearance' && <AppearanceTab />}
                 {tab === 'general' && <GeneralTab />}
+                {tab === 'notifications' && <NotificationsTab />}
                 {tab === 'about' && <AboutTab />}
               </div>
             </div>

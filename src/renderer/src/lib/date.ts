@@ -140,3 +140,33 @@ export function monthRange(year: number, month: number): { start: string; end: s
   const last = new Date(year, month + 1, 0)
   return { start: toIsoDate(first), end: toIsoDate(last) }
 }
+
+export function addDays(dateIso: string, n: number): string {
+  const d = new Date(dateIso + 'T00:00:00')
+  d.setDate(d.getDate() + n)
+  return toIsoDate(d)
+}
+
+export interface WeekRange {
+  start: string
+  end: string
+  days: string[]
+}
+
+/**
+ * Sun-start week (7 days) containing the given date.
+ */
+export function weekRange(dateIso: string): WeekRange {
+  const d = new Date(dateIso + 'T00:00:00')
+  const start = new Date(d)
+  start.setDate(start.getDate() - start.getDay())
+
+  const days: string[] = []
+  const cursor = new Date(start)
+  for (let i = 0; i < 7; i++) {
+    days.push(toIsoDate(cursor))
+    cursor.setDate(cursor.getDate() + 1)
+  }
+
+  return { start: days[0], end: days[6], days }
+}

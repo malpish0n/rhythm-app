@@ -29,6 +29,8 @@ export const CHANNELS = {
   },
   app: {
     getTheme: 'app:getTheme',
-    setTheme: 'app:setTheme'
+    setTheme: 'app:setTheme',
+    getDockIconStyle: 'app:getDockIconStyle',
+    setDockIconStyle: 'app:setDockIconStyle'
   }
 } as const

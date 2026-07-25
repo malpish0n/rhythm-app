@@ -4,6 +4,58 @@ import { useAppStore } from '@renderer/state/store'
 import { THEMES } from '@renderer/lib/themes'
 import { FONTS } from '@renderer/lib/fonts'
 import { fastSpring, sliderSpring } from '@renderer/lib/motionPresets'
+import { CustomThemeSection } from './CustomThemeSection'
+import iconLight from '@renderer/assets/icon-round-light.png'
+import iconDark from '@renderer/assets/icon-round-dark.png'
+import type { DockIconStyle } from '@shared/types'
+
+const APP_ICONS: { id: DockIconStyle; name: string; src: string }[] = [
+  { id: 'light', name: 'Light', src: iconLight },
+  { id: 'dark', name: 'Dark', src: iconDark }
+]
+
+function IconSwatch({
+  name,
+  src,
+  selected,
+  onSelect
+}: {
+  name: string
+  src: string
+  selected: boolean
+  onSelect: () => void
+}): JSX.Element {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex flex-col items-center gap-1.5"
+      aria-label={`App icon: ${name}`}
+    >
+      <div
+        className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full"
+        style={{
+          boxShadow: selected
+            ? `0 0 0 2px var(--surface), 0 0 0 4px var(--accent)`
+            : '0 0 0 1px var(--border)'
+        }}
+      >
+        <img src={src} alt="" className="h-full w-full object-cover" />
+        {selected && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={fastSpring}
+            className="absolute inset-0 flex items-center justify-center bg-black/30"
+          >
+            <Check size={16} className="text-white" />
+          </motion.div>
+        )}
+      </div>
+      <span className="text-[10px] text-[var(--text-muted)]">{name}</span>
+    </button>
+  )
+}
 
 function ThemeSwatch({
   name,
@@ -58,10 +110,17 @@ export function AppearanceTab(): JSX.Element {
   const setThemeId = useAppStore((s) => s.setThemeId)
   const fontId = useAppStore((s) => s.fontId)
   const setFontId = useAppStore((s) => s.setFontId)
+  const dockIconStyle = useAppStore((s) => s.dockIconStyle)
+  const setDockIconStyle = useAppStore((s) => s.setDockIconStyle)
 
   const select = (id: string): void => {
     setThemeId(id)
     window.api.app.setTheme(id)
+  }
+
+  const selectIcon = (id: DockIconStyle): void => {
+    setDockIconStyle(id)
+    window.api.app.setDockIconStyle(id)
   }
 
   const darkThemes = THEMES.filter((t) => t.isDark)
@@ -95,6 +154,25 @@ export function AppearanceTab(): JSX.Element {
             colors={t.colors}
             selected={themeId === t.id}
             onSelect={() => select(t.id)}
+          />
+        ))}
+      </div>
+
+      <div className="mb-6">
+        <CustomThemeSection />
+      </div>
+
+      <p className="mb-2 text-[10px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
+        App icon
+      </p>
+      <div className="mb-6 flex gap-3">
+        {APP_ICONS.map((icon) => (
+          <IconSwatch
+            key={icon.id}
+            name={icon.name}
+            src={icon.src}
+            selected={dockIconStyle === icon.id}
+            onSelect={() => selectIcon(icon.id)}
           />
         ))}
       </div>

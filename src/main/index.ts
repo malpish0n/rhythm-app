@@ -3,6 +3,10 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcHandlers } from './ipc/handlers'
 import { getDb } from './db/connection'
+import { applyDockIcon } from './dockIcon'
+import * as prefsRepo from './db/repositories/prefsRepo'
+
+const devIconPath = join(__dirname, '../../build/icon.png')
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -13,6 +17,7 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: 'hiddenInset',
+    ...(is.dev && process.platform !== 'darwin' ? { icon: devIconPath } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.cjs'),
       sandbox: true,
@@ -45,6 +50,7 @@ app.whenReady().then(() => {
   })
 
   getDb()
+  applyDockIcon(prefsRepo.getDockIconStyle())
   registerIpcHandlers()
 
   createWindow()
