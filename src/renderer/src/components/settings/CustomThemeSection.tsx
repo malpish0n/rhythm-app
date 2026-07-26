@@ -3,7 +3,14 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Check, ChevronDown, Pencil } from 'lucide-react'
 import { useAppStore } from '@renderer/state/store'
 import { fastSpring, fade } from '@renderer/lib/motionPresets'
+import { Tooltip } from '@renderer/components/ui/Tooltip'
+import { SegmentedControl, type SegmentedOption } from '@renderer/components/ui/SegmentedControl'
 import type { ThemeColors } from '@renderer/lib/themes'
+
+const BASE_MODE_OPTIONS: SegmentedOption<'dark' | 'light'>[] = [
+  { value: 'dark', label: 'Dark' },
+  { value: 'light', label: 'Light' }
+]
 
 const FIELDS: { key: keyof ThemeColors; label: string; description: string }[] = [
   { key: 'bg', label: 'Background', description: 'Main app background' },
@@ -37,32 +44,34 @@ export function CustomThemeSection(): JSX.Element {
         Custom
       </p>
       <div className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3">
-        <button
-          type="button"
-          onClick={select}
-          aria-label="Use custom theme"
-          className="relative grid h-11 w-11 flex-shrink-0 grid-cols-2 grid-rows-2 overflow-hidden rounded-lg border border-[var(--border)] shadow-elevation-sm"
-          style={{
-            boxShadow: isActive
-              ? `0 0 0 2px var(--surface), 0 0 0 4px ${colors.accent}, var(--shadow-sm)`
-              : undefined
-          }}
-        >
-          <div style={{ backgroundColor: colors.bg }} />
-          <div style={{ backgroundColor: colors.surface }} />
-          <div style={{ backgroundColor: colors.text }} />
-          <div style={{ backgroundColor: colors.accent }} />
-          {isActive && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={fastSpring}
-              className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/30"
-            >
-              <Check size={16} className="text-white" />
-            </motion.div>
-          )}
-        </button>
+        <Tooltip label="Use custom theme" className="flex-shrink-0">
+          <button
+            type="button"
+            onClick={select}
+            aria-label="Use custom theme"
+            className="relative grid h-11 w-11 flex-shrink-0 grid-cols-2 grid-rows-2 overflow-hidden rounded-lg border border-[var(--border)] shadow-elevation-sm"
+            style={{
+              boxShadow: isActive
+                ? `0 0 0 2px var(--surface), 0 0 0 4px ${colors.accent}, var(--shadow-sm)`
+                : undefined
+            }}
+          >
+            <div style={{ backgroundColor: colors.bg }} />
+            <div style={{ backgroundColor: colors.surface }} />
+            <div style={{ backgroundColor: colors.text }} />
+            <div style={{ backgroundColor: colors.accent }} />
+            {isActive && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={fastSpring}
+                className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/30"
+              >
+                <Check size={16} className="text-white" />
+              </motion.div>
+            )}
+          </button>
+        </Tooltip>
 
         <div className="flex-1">
           <p className="text-sm font-medium">Your theme</p>
@@ -71,14 +80,16 @@ export function CustomThemeSection(): JSX.Element {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setEditing((v) => !v)}
-          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)]"
-          aria-label={editing ? 'Collapse editor' : 'Edit custom theme'}
-        >
-          {editing ? <ChevronDown size={16} /> : <Pencil size={15} />}
-        </button>
+        <Tooltip label={editing ? 'Collapse' : 'Edit'} className="flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)]"
+            aria-label={editing ? 'Collapse editor' : 'Edit custom theme'}
+          >
+            {editing ? <ChevronDown size={16} /> : <Pencil size={15} />}
+          </button>
+        </Tooltip>
       </div>
 
       <AnimatePresence initial={false}>
@@ -93,25 +104,14 @@ export function CustomThemeSection(): JSX.Element {
             <div className="mt-3 flex flex-col gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-sm font-medium">Base mode</p>
-                <div className="flex gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-1">
-                  {(['dark', 'light'] as const).map((mode) => {
-                    const active = (isDark ? 'dark' : 'light') === mode
-                    return (
-                      <button
-                        key={mode}
-                        type="button"
-                        onClick={() => setIsDark(mode === 'dark')}
-                        className="rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors"
-                        style={{
-                          backgroundColor: active ? 'var(--accent)' : 'transparent',
-                          color: active ? 'white' : 'var(--text-muted)'
-                        }}
-                      >
-                        {mode}
-                      </button>
-                    )
-                  })}
-                </div>
+                <SegmentedControl
+                  layoutId="customThemeBaseMode"
+                  size="sm"
+                  className="bg-[var(--surface)]"
+                  options={BASE_MODE_OPTIONS}
+                  value={isDark ? 'dark' : 'light'}
+                  onChange={(mode) => setIsDark(mode === 'dark')}
+                />
               </div>
 
               {FIELDS.map((field) => (

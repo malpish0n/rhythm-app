@@ -1,4 +1,5 @@
 import { SQLiteConnection, CapacitorSQLite, type SQLiteDBConnection } from '@capacitor-community/sqlite'
+import { LocalNotifications } from '@capacitor/local-notifications'
 import {
   SQL,
   MIGRATIONS,
@@ -7,7 +8,8 @@ import {
   toPlanRule,
   toDayNote,
   todayIso,
-  computeStreak
+  computeStreak,
+  buildSearchPattern
 } from '@shared/sql'
 import type {
   Activity,
@@ -17,6 +19,7 @@ import type {
   DayAggregate,
   DockIconStyle,
   LogEntry,
+  NotificationPrefs,
   PlanRule,
   ThemePreference,
   UpdateActivityInput,
@@ -25,6 +28,27 @@ import type {
 } from '@shared/types'
 
 const DB_NAME = 'activity_tracker'
+const REMINDER_NOTIFICATION_ID = 1001
+
+async function scheduleReminderNotification(prefs: NotificationPrefs): Promise<void> {
+  await LocalNotifications.cancel({ notifications: [{ id: REMINDER_NOTIFICATION_ID }] })
+  if (!prefs.enabled) return
+
+  const permission = await LocalNotifications.requestPermissions()
+  if (permission.display !== 'granted') return
+
+  const [hour, minute] = prefs.time.split(':').map(Number)
+  await LocalNotifications.schedule({
+    notifications: [
+      {
+        id: REMINDER_NOTIFICATION_ID,
+        title: 'Rhythm',
+        body: "Don't forget to log today's activities",
+        schedule: { on: { hour, minute }, allowWhileIdle: true, repeats: true }
+      }
+    ]
+  })
+}
 
 let dbPromise: Promise<SQLiteDBConnection> | null = null
 
@@ -86,6 +110,8 @@ export function createCapacitorApi(): ActivityApi {
           input.color,
           input.icon ?? null,
           input.defaultIncrement ?? 1,
+          input.unit ?? null,
+          input.weeklyTarget ?? null,
           maxOrder + 1,
           createdAt
         ])
@@ -104,6 +130,9 @@ export function createCapacitorApi(): ActivityApi {
           color: patch.color ?? existing.color,
           icon: patch.icon !== undefined ? patch.icon : existing.icon,
           default_increment: patch.defaultIncrement ?? existing.default_increment,
+          unit: patch.unit !== undefined ? patch.unit : existing.unit,
+          weekly_target:
+            patch.weeklyTarget !== undefined ? patch.weeklyTarget : existing.weekly_target,
           sort_order: patch.sortOrder ?? existing.sort_order
         }
 
@@ -112,6 +141,8 @@ export function createCapacitorApi(): ActivityApi {
           next.color,
           next.icon,
           next.default_increment,
+          next.unit,
+          next.weekly_target,
           next.sort_order,
           id
         ])
@@ -121,6 +152,10 @@ export function createCapacitorApi(): ActivityApi {
       async archive(id: string): Promise<void> {
         const db = await getDb()
         await db.run(SQL.activities.archive, [id])
+      },
+      async unarchive(id: string): Promise<void> {
+        const db = await getDb()
+        await db.run(SQL.activities.unarchive, [id])
       },
       async delete(id: string): Promise<void> {
         const db = await getDb()
@@ -328,6 +363,11 @@ export function createCapacitorApi(): ActivityApi {
         const res = await db.query(SQL.dayNotes.listByRange, [startDate, endDate])
         return (res.values ?? []).map(toDayNote)
       },
+      async search(query: string) {
+        const db = await getDb()
+        const res = await db.query(SQL.dayNotes.search, [buildSearchPattern(query)])
+        return (res.values ?? []).map(toDayNote)
+      },
       async upsert(date: string, content: string) {
         const db = await getDb()
         const updatedAt = new Date().toISOString()
@@ -369,6 +409,26 @@ export function createCapacitorApi(): ActivityApi {
            ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
           [style]
         )
+      },
+      async getNotificationPrefs(): Promise<NotificationPrefs> {
+        const db = await getDb()
+        const res = await db.query(`SELECT value FROM app_meta WHERE key = 'notificationPrefs'`)
+        const raw = res.values?.[0]?.value
+        if (!raw) return { enabled: false, time: '20:00' }
+        try {
+          return JSON.parse(raw) as NotificationPrefs
+        } catch {
+          return { enabled: false, time: '20:00' }
+        }
+      },
+      async setNotificationPrefs(prefs: NotificationPrefs): Promise<void> {
+        const db = await getDb()
+        await db.run(
+          `INSERT INTO app_meta (key, value) VALUES ('notificationPrefs', ?)
+           ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+          [JSON.stringify(prefs)]
+        )
+        await scheduleReminderNotification(prefs)
       }
     }
   }

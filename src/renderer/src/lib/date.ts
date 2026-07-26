@@ -9,6 +9,11 @@ export function todayIso(): string {
   return toIsoDate(new Date())
 }
 
+export function yearsAgoIso(dateIso: string, years: number): string {
+  const [y, m, d] = dateIso.split('-').map(Number)
+  return toIsoDate(new Date(y - years, m - 1, d))
+}
+
 export interface DayCellData {
   date: string
   inYear: boolean

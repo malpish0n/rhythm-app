@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Minus, Plus } from 'lucide-react'
 import { fastSpring } from '@renderer/lib/motionPresets'
+import { Tooltip } from '@renderer/components/ui/Tooltip'
+import { SegmentedControl, type SegmentedOption } from '@renderer/components/ui/SegmentedControl'
 import type { PlanFrequency } from '@shared/types'
 
 const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -15,6 +17,10 @@ const FREQUENCIES: Extract<PlanFrequency, 'daily' | 'weekly' | 'monthly'>[] = [
   'weekly',
   'monthly'
 ]
+const FREQUENCY_OPTIONS: SegmentedOption<(typeof FREQUENCIES)[number]>[] = FREQUENCIES.map((f) => ({
+  value: f,
+  label: f
+}))
 const UNIT_LABELS: Record<(typeof FREQUENCIES)[number], string> = {
   daily: 'day',
   weekly: 'week',
@@ -76,22 +82,16 @@ export function RecurrencePicker({
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3">
-      <div className="flex gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-1">
-        {FREQUENCIES.map((f) => (
-          <button
-            key={f}
-            type="button"
-            onClick={() => setFrequency(f)}
-            className="flex-1 rounded-md py-1 text-xs font-medium capitalize transition-colors"
-            style={{
-              backgroundColor: frequency === f ? 'var(--accent)' : 'transparent',
-              color: frequency === f ? 'white' : 'var(--text-muted)'
-            }}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        layoutId="recurrenceFrequency"
+        size="sm"
+        className="bg-[var(--surface)]"
+        fullWidth
+        capitalizeLabels
+        options={FREQUENCY_OPTIONS}
+        value={frequency}
+        onChange={setFrequency}
+      />
 
       <div className="flex items-center gap-2">
         <span className="text-xs text-[var(--text-muted)]">
@@ -99,23 +99,27 @@ export function RecurrencePicker({
           {interval > 1 ? 's' : ''}
         </span>
         <div className="ml-auto flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setInterval((v) => Math.max(1, v - 1))}
-            className="flex h-6 w-6 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
-            aria-label="Decrease interval"
-          >
-            <Minus size={12} />
-          </button>
+          <Tooltip label="Decrease interval">
+            <button
+              type="button"
+              onClick={() => setInterval((v) => Math.max(1, v - 1))}
+              className="flex h-6 w-6 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
+              aria-label="Decrease interval"
+            >
+              <Minus size={12} />
+            </button>
+          </Tooltip>
           <span className="w-5 text-center text-xs font-medium tabular-nums">{interval}</span>
-          <button
-            type="button"
-            onClick={() => setInterval((v) => Math.min(12, v + 1))}
-            className="flex h-6 w-6 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
-            aria-label="Increase interval"
-          >
-            <Plus size={12} />
-          </button>
+          <Tooltip label="Increase interval">
+            <button
+              type="button"
+              onClick={() => setInterval((v) => Math.min(12, v + 1))}
+              className="flex h-6 w-6 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--text)]"
+              aria-label="Increase interval"
+            >
+              <Plus size={12} />
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -212,11 +216,7 @@ export function RecurrencePicker({
           transition={fastSpring}
           disabled={!canSave}
           onClick={handleSave}
-          className="rounded-lg px-3 py-1.5 text-xs font-medium text-white shadow-elevation-sm transition-shadow hover:shadow-elevation-md disabled:opacity-40 disabled:shadow-none active:shadow-none"
-          style={{
-            backgroundImage:
-              'linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, white), var(--accent))'
-          }}
+          className="accent-gradient rounded-lg px-3 py-1.5 text-xs font-medium text-white shadow-elevation-sm transition-shadow hover:shadow-elevation-md disabled:opacity-40 disabled:shadow-none active:shadow-none"
         >
           Save
         </motion.button>

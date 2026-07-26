@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
 import { DayAgenda } from './DayAgenda'
 import { fade } from '@renderer/lib/motionPresets'
+import { Tooltip } from '@renderer/components/ui/Tooltip'
 import type { Activity } from '@shared/types'
 
 interface DayDetailPopoverProps {
@@ -46,12 +47,15 @@ export function DayDetailPopover({
         >
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold">{formatted}</h2>
-            <button
-              onClick={onClose}
-              className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
-            >
-              <X size={16} />
-            </button>
+            <Tooltip label="Close" side="bottom">
+              <button
+                onClick={onClose}
+                aria-label="Close"
+                className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
+              >
+                <X size={16} />
+              </button>
+            </Tooltip>
           </div>
 
           <DayAgenda date={date} activities={activities} refreshToken={refreshToken} />

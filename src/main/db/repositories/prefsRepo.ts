@@ -1,5 +1,5 @@
 import { getDb } from '../connection'
-import type { DockIconStyle, ThemePreference } from '@shared/types'
+import type { DockIconStyle, NotificationPrefs, ThemePreference } from '@shared/types'
 
 export function getTheme(): ThemePreference {
   const db = getDb()
@@ -31,4 +31,25 @@ export function setDockIconStyle(style: DockIconStyle): void {
     `INSERT INTO app_meta (key, value) VALUES ('dockIconStyle', ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value`
   ).run(style)
+}
+
+export function getNotificationPrefs(): NotificationPrefs {
+  const db = getDb()
+  const row = db.prepare(`SELECT value FROM app_meta WHERE key = 'notificationPrefs'`).get() as
+    | { value: string }
+    | undefined
+  if (!row) return { enabled: false, time: '20:00' }
+  try {
+    return JSON.parse(row.value) as NotificationPrefs
+  } catch {
+    return { enabled: false, time: '20:00' }
+  }
+}
+
+export function setNotificationPrefs(prefs: NotificationPrefs): void {
+  const db = getDb()
+  db.prepare(
+    `INSERT INTO app_meta (key, value) VALUES ('notificationPrefs', ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+  ).run(JSON.stringify(prefs))
 }

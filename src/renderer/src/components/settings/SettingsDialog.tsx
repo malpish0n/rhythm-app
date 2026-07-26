@@ -6,6 +6,7 @@ import { GeneralTab } from './GeneralTab'
 import { NotificationsTab } from './NotificationsTab'
 import { AboutTab } from './AboutTab'
 import { fade, sliderSpring } from '@renderer/lib/motionPresets'
+import { Tooltip } from '@renderer/components/ui/Tooltip'
 
 type SettingsTab = 'appearance' | 'general' | 'notifications' | 'about'
 
@@ -45,13 +46,15 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps): JSX.Elem
           >
             <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3.5">
               <h2 className="text-sm font-semibold">Settings</h2>
-              <button
-                onClick={onClose}
-                className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
-                aria-label="Close settings"
-              >
-                <X size={16} />
-              </button>
+              <Tooltip label="Close" side="bottom">
+                <button
+                  onClick={onClose}
+                  className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
+                  aria-label="Close settings"
+                >
+                  <X size={16} />
+                </button>
+              </Tooltip>
             </div>
 
             <div className="flex min-h-0 flex-1">

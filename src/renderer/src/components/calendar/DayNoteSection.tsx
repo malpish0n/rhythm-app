@@ -49,7 +49,7 @@ export function DayNoteSection({ date }: DayNoteSectionProps): JSX.Element {
   }
 
   return (
-    <div className="mb-3 rounded-lg border border-[var(--border)] bg-[var(--surface-2)]">
+    <div className="mb-3 mt-3 rounded-lg border border-[var(--border)] bg-[var(--surface-2)]">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}

@@ -10,6 +10,7 @@ import type {
   CreateActivityInput,
   CreatePlanRuleInput,
   DockIconStyle,
+  NotificationPrefs,
   ThemePreference,
   UpdateActivityInput,
   UpdateLogEntryInput,
@@ -27,6 +28,7 @@ export function registerIpcHandlers(): void {
     activitiesRepo.update(id, patch)
   )
   ipcMain.handle(CHANNELS.activities.archive, (_e, id: string) => activitiesRepo.archive(id))
+  ipcMain.handle(CHANNELS.activities.unarchive, (_e, id: string) => activitiesRepo.unarchive(id))
   ipcMain.handle(CHANNELS.activities.delete, (_e, id: string) => activitiesRepo.remove(id))
   ipcMain.handle(CHANNELS.activities.reorder, (_e, orderedIds: string[]) =>
     activitiesRepo.reorder(orderedIds)
@@ -78,6 +80,7 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(CHANNELS.dayNotes.listByRange, (_e, startDate: string, endDate: string) =>
     dayNotesRepo.listByRange(startDate, endDate)
   )
+  ipcMain.handle(CHANNELS.dayNotes.search, (_e, query: string) => dayNotesRepo.search(query))
   ipcMain.handle(CHANNELS.dayNotes.upsert, (_e, date: string, content: string) =>
     dayNotesRepo.upsert(date, content)
   )
@@ -90,4 +93,8 @@ export function registerIpcHandlers(): void {
     prefsRepo.setDockIconStyle(style)
     applyDockIcon(style)
   })
+  ipcMain.handle(CHANNELS.app.getNotificationPrefs, () => prefsRepo.getNotificationPrefs())
+  ipcMain.handle(CHANNELS.app.setNotificationPrefs, (_e, prefs: NotificationPrefs) =>
+    prefsRepo.setNotificationPrefs(prefs)
+  )
 }

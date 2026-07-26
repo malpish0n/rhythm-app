@@ -1,8 +1,6 @@
-import { motion } from 'motion/react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { MONTH_NAMES_FULL, todayIso, weekRange } from '@renderer/lib/date'
-import { fastSpring } from '@renderer/lib/motionPresets'
 import { CalendarFormatSwitcher } from './CalendarFormatSwitcher'
+import { NavArrowButton } from '@renderer/components/ui/NavArrowButton'
 import type { CalendarFormat, MonthCursor } from '@renderer/state/store'
 
 interface ContentHeaderProps {
@@ -18,9 +16,6 @@ interface ContentHeaderProps {
   onPrevWeek: () => void
   onNextWeek: () => void
 }
-
-const navButtonClass =
-  'flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)] disabled:opacity-30 disabled:hover:bg-transparent'
 
 function formatWeekLabel(weekCursor: string): string {
   const { start, end } = weekRange(weekCursor)
@@ -67,80 +62,57 @@ export function ContentHeader({
     })
     dateNav = (
       <div className="flex items-center gap-1">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          transition={fastSpring}
-          onClick={onPrevDay}
-          className={navButtonClass}
-          aria-label="Previous day"
-        >
-          <ChevronLeft size={17} />
-        </motion.button>
+        <NavArrowButton direction="prev" label="Previous day" onClick={onPrevDay} tooltipSide="bottom" />
         <span className="w-44 text-center text-base font-semibold tabular-nums">{label}</span>
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          transition={fastSpring}
+        <NavArrowButton
+          direction="next"
+          label="Next day"
           onClick={onNextDay}
           disabled={isToday}
-          className={navButtonClass}
-          aria-label="Next day"
-        >
-          <ChevronRight size={17} />
-        </motion.button>
+          tooltipSide="bottom"
+        />
       </div>
     )
   } else if (calendarFormat === 'week') {
     dateNav = (
       <div className="flex items-center gap-1">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          transition={fastSpring}
+        <NavArrowButton
+          direction="prev"
+          label="Previous week"
           onClick={onPrevWeek}
-          className={navButtonClass}
-          aria-label="Previous week"
-        >
-          <ChevronLeft size={17} />
-        </motion.button>
+          tooltipSide="bottom"
+        />
         <span className="w-44 text-center text-base font-semibold tabular-nums">
           {formatWeekLabel(weekCursor)}
         </span>
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          transition={fastSpring}
+        <NavArrowButton
+          direction="next"
+          label="Next week"
           onClick={onNextWeek}
           disabled={isCurrentWeek}
-          className={navButtonClass}
-          aria-label="Next week"
-        >
-          <ChevronRight size={17} />
-        </motion.button>
+          tooltipSide="bottom"
+        />
       </div>
     )
   } else {
     dateNav = (
       <div className="flex items-center gap-1">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          transition={fastSpring}
+        <NavArrowButton
+          direction="prev"
+          label="Previous month"
           onClick={onPrevMonth}
-          className={navButtonClass}
-          aria-label="Previous month"
-        >
-          <ChevronLeft size={17} />
-        </motion.button>
+          tooltipSide="bottom"
+        />
         <span className="w-36 text-center text-base font-semibold tabular-nums">
           {MONTH_NAMES_FULL[monthCursor.month]} {monthCursor.year}
         </span>
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          transition={fastSpring}
+        <NavArrowButton
+          direction="next"
+          label="Next month"
           onClick={onNextMonth}
           disabled={isCurrentMonth}
-          className={navButtonClass}
-          aria-label="Next month"
-        >
-          <ChevronRight size={17} />
-        </motion.button>
+          tooltipSide="bottom"
+        />
       </div>
     )
   }

@@ -1,12 +1,20 @@
 import { motion } from 'motion/react'
 import { useAppStore } from '@renderer/state/store'
 import { sliderSpring } from '@renderer/lib/motionPresets'
+import { SegmentedControl, type SegmentedOption } from '@renderer/components/ui/SegmentedControl'
 import type { TimeFormat } from '@renderer/lib/time'
 
-const TIME_FORMATS: { id: TimeFormat; label: string }[] = [
-  { id: 'system', label: 'System' },
-  { id: '12h', label: '12h' },
-  { id: '24h', label: '24h' }
+const TIME_FORMATS: SegmentedOption<TimeFormat>[] = [
+  { value: 'system', label: 'System' },
+  { value: '12h', label: '12h' },
+  { value: '24h', label: '24h' }
+]
+
+const SHORTCUTS: { keys: string; description: string }[] = [
+  { keys: '⌘K / Ctrl+K', description: 'Open search & commands' },
+  { keys: '↑ / ↓', description: 'Navigate results in the palette' },
+  { keys: '↵', description: 'Run the highlighted command' },
+  { keys: 'Esc', description: 'Close the palette or a dialog' }
 ]
 
 export function GeneralTab(): JSX.Element {
@@ -47,19 +55,26 @@ export function GeneralTab(): JSX.Element {
             Used for hours in the Day and Week views. "System" follows your OS preference.
           </p>
         </div>
-        <div className="flex flex-shrink-0 gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-1">
-          {TIME_FORMATS.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setTimeFormat(f.id)}
-              className="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-              style={{
-                backgroundColor: timeFormat === f.id ? 'var(--accent)' : 'transparent',
-                color: timeFormat === f.id ? 'white' : 'var(--text-muted)'
-              }}
-            >
-              {f.label}
-            </button>
+        <SegmentedControl
+          layoutId="timeFormat"
+          size="sm"
+          className="bg-[var(--surface)]"
+          options={TIME_FORMATS}
+          value={timeFormat}
+          onChange={setTimeFormat}
+        />
+      </div>
+
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4">
+        <p className="mb-2 text-sm font-medium">Keyboard shortcuts</p>
+        <div className="flex flex-col gap-1.5">
+          {SHORTCUTS.map((s) => (
+            <div key={s.keys} className="flex items-center justify-between gap-3 text-xs">
+              <span className="text-[var(--text-muted)]">{s.description}</span>
+              <span className="flex-shrink-0 rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 font-medium">
+                {s.keys}
+              </span>
+            </div>
           ))}
         </div>
       </div>

@@ -11,3 +11,18 @@ export const tapScale = {
   whileTap: { scale: 0.97 },
   transition: fastSpring
 }
+
+export const staggerContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.05 } }
+}
+
+export const staggerItem = {
+  hidden: { opacity: 0, y: 12, scale: 0.98 },
+  show: { opacity: 1, y: 0, scale: 1, transition: fastSpring }
+}
+
+export const cardHover = {
+  whileHover: { y: -2 },
+  transition: fastSpring
+}

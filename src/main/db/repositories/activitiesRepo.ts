@@ -23,6 +23,8 @@ export function create(input: CreateActivityInput): Activity {
     input.color,
     input.icon ?? null,
     input.defaultIncrement ?? 1,
+    input.unit ?? null,
+    input.weeklyTarget ?? null,
     maxOrder.maxOrder + 1,
     createdAt
   )
@@ -41,6 +43,8 @@ export function update(id: string, patch: UpdateActivityInput): Activity {
     color: patch.color ?? existing.color,
     icon: patch.icon !== undefined ? patch.icon : existing.icon,
     default_increment: patch.defaultIncrement ?? existing.default_increment,
+    unit: patch.unit !== undefined ? patch.unit : existing.unit,
+    weekly_target: patch.weeklyTarget !== undefined ? patch.weeklyTarget : existing.weekly_target,
     sort_order: patch.sortOrder ?? existing.sort_order
   }
 
@@ -49,6 +53,8 @@ export function update(id: string, patch: UpdateActivityInput): Activity {
     next.color,
     next.icon,
     next.default_increment,
+    next.unit,
+    next.weekly_target,
     next.sort_order,
     id
   )
@@ -59,6 +65,11 @@ export function update(id: string, patch: UpdateActivityInput): Activity {
 export function archive(id: string): void {
   const db = getDb()
   db.prepare(SQL.activities.archive).run(id)
+}
+
+export function unarchive(id: string): void {
+  const db = getDb()
+  db.prepare(SQL.activities.unarchive).run(id)
 }
 
 export function remove(id: string): void {

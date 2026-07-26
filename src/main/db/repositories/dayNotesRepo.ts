@@ -1,10 +1,16 @@
 import { getDb } from '../connection'
-import { SQL, toDayNote, type DayNoteRow } from '@shared/sql'
+import { SQL, toDayNote, buildSearchPattern, type DayNoteRow } from '@shared/sql'
 import type { DayNote } from '@shared/types'
 
 export function listByRange(startDate: string, endDate: string): DayNote[] {
   const db = getDb()
   const rows = db.prepare(SQL.dayNotes.listByRange).all(startDate, endDate) as DayNoteRow[]
+  return rows.map(toDayNote)
+}
+
+export function search(query: string): DayNote[] {
+  const db = getDb()
+  const rows = db.prepare(SQL.dayNotes.search).all(buildSearchPattern(query)) as DayNoteRow[]
   return rows.map(toDayNote)
 }
 

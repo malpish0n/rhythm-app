@@ -5,6 +5,15 @@ export interface DayTotals {
   byActivity: Record<string, number>
 }
 
+export function aggregateByWeekday(rows: DayAggregate[]): number[] {
+  const totals = [0, 0, 0, 0, 0, 0, 0]
+  for (const row of rows) {
+    const weekday = new Date(row.date + 'T00:00:00').getDay()
+    totals[weekday] += row.total
+  }
+  return totals
+}
+
 export function aggregateByDate(rows: DayAggregate[]): { totalsByDate: Map<string, DayTotals>; maxCount: number } {
   const map = new Map<string, DayTotals>()
   let max = 0

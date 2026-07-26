@@ -5,6 +5,7 @@ import type {
   CreateActivityInput,
   CreatePlanRuleInput,
   DockIconStyle,
+  NotificationPrefs,
   ThemePreference,
   UpdateActivityInput,
   UpdateLogEntryInput,
@@ -18,6 +19,7 @@ const api: ActivityApi = {
     update: (id, patch: UpdateActivityInput) =>
       ipcRenderer.invoke(CHANNELS.activities.update, id, patch),
     archive: (id) => ipcRenderer.invoke(CHANNELS.activities.archive, id),
+    unarchive: (id) => ipcRenderer.invoke(CHANNELS.activities.unarchive, id),
     delete: (id) => ipcRenderer.invoke(CHANNELS.activities.delete, id),
     reorder: (orderedIds) => ipcRenderer.invoke(CHANNELS.activities.reorder, orderedIds)
   },
@@ -52,6 +54,7 @@ const api: ActivityApi = {
   dayNotes: {
     listByRange: (startDate, endDate) =>
       ipcRenderer.invoke(CHANNELS.dayNotes.listByRange, startDate, endDate),
+    search: (query) => ipcRenderer.invoke(CHANNELS.dayNotes.search, query),
     upsert: (date, content) => ipcRenderer.invoke(CHANNELS.dayNotes.upsert, date, content),
     delete: (date) => ipcRenderer.invoke(CHANNELS.dayNotes.delete, date)
   },
@@ -60,7 +63,10 @@ const api: ActivityApi = {
     setTheme: (theme: ThemePreference) => ipcRenderer.invoke(CHANNELS.app.setTheme, theme),
     getDockIconStyle: () => ipcRenderer.invoke(CHANNELS.app.getDockIconStyle),
     setDockIconStyle: (style: DockIconStyle) =>
-      ipcRenderer.invoke(CHANNELS.app.setDockIconStyle, style)
+      ipcRenderer.invoke(CHANNELS.app.setDockIconStyle, style),
+    getNotificationPrefs: () => ipcRenderer.invoke(CHANNELS.app.getNotificationPrefs),
+    setNotificationPrefs: (prefs: NotificationPrefs) =>
+      ipcRenderer.invoke(CHANNELS.app.setNotificationPrefs, prefs)
   }
 }
 

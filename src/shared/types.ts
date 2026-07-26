@@ -4,6 +4,8 @@ export interface Activity {
   color: string
   icon: string | null
   defaultIncrement: number
+  unit: string | null
+  weeklyTarget: number | null
   archived: boolean
   sortOrder: number
   createdAt: string
@@ -46,11 +48,18 @@ export interface StreakResult {
 export type ThemePreference = 'system' | string
 export type DockIconStyle = 'light' | 'dark'
 
+export interface NotificationPrefs {
+  enabled: boolean
+  time: string // 'HH:MM' 24h, reminder time
+}
+
 export interface CreateActivityInput {
   name: string
   color: string
   icon?: string | null
   defaultIncrement?: number
+  unit?: string | null
+  weeklyTarget?: number | null
 }
 
 export interface UpdateActivityInput {
@@ -58,6 +67,8 @@ export interface UpdateActivityInput {
   color?: string
   icon?: string | null
   defaultIncrement?: number
+  unit?: string | null
+  weeklyTarget?: number | null
   sortOrder?: number
 }
 
@@ -114,6 +125,7 @@ export interface ActivityApi {
     create(input: CreateActivityInput): Promise<Activity>
     update(id: string, patch: UpdateActivityInput): Promise<Activity>
     archive(id: string): Promise<void>
+    unarchive(id: string): Promise<void>
     delete(id: string): Promise<void>
     reorder(orderedIds: string[]): Promise<void>
   }
@@ -143,6 +155,7 @@ export interface ActivityApi {
   }
   dayNotes: {
     listByRange(startDate: string, endDate: string): Promise<DayNote[]>
+    search(query: string): Promise<DayNote[]>
     upsert(date: string, content: string): Promise<DayNote>
     delete(date: string): Promise<void>
   }
@@ -151,5 +164,7 @@ export interface ActivityApi {
     setTheme(theme: ThemePreference): Promise<void>
     getDockIconStyle(): Promise<DockIconStyle>
     setDockIconStyle(style: DockIconStyle): Promise<void>
+    getNotificationPrefs(): Promise<NotificationPrefs>
+    setNotificationPrefs(prefs: NotificationPrefs): Promise<void>
   }
 }

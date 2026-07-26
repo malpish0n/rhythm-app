@@ -6,6 +6,8 @@ import migration005 from './migrations/005_log_entry_time.sql?raw'
 import migration006 from './migrations/006_plan_rule_time.sql?raw'
 import migration007 from './migrations/007_log_entry_end_time.sql?raw'
 import migration008 from './migrations/008_day_notes.sql?raw'
+import migration009 from './migrations/009_activity_unit.sql?raw'
+import migration010 from './migrations/010_activity_weekly_target.sql?raw'
 import type { Activity, DayNote, LogEntry, PlanRule, StreakResult } from './types'
 
 export const MIGRATIONS: { version: number; sql: string }[] = [
@@ -16,7 +18,9 @@ export const MIGRATIONS: { version: number; sql: string }[] = [
   { version: 5, sql: migration005 },
   { version: 6, sql: migration006 },
   { version: 7, sql: migration007 },
-  { version: 8, sql: migration008 }
+  { version: 8, sql: migration008 },
+  { version: 9, sql: migration009 },
+  { version: 10, sql: migration010 }
 ]
 
 export const SQL = {
@@ -25,12 +29,13 @@ export const SQL = {
       'SELECT * FROM activities WHERE archived = 0 ORDER BY sort_order ASC, created_at ASC',
     listAll: 'SELECT * FROM activities ORDER BY sort_order ASC, created_at ASC',
     maxSortOrder: 'SELECT COALESCE(MAX(sort_order), -1) AS maxOrder FROM activities',
-    insert: `INSERT INTO activities (id, name, color, icon, default_increment, archived, sort_order, created_at)
-             VALUES (?, ?, ?, ?, ?, 0, ?, ?)`,
+    insert: `INSERT INTO activities (id, name, color, icon, default_increment, unit, weekly_target, archived, sort_order, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
     getById: 'SELECT * FROM activities WHERE id = ?',
     update:
-      'UPDATE activities SET name = ?, color = ?, icon = ?, default_increment = ?, sort_order = ? WHERE id = ?',
+      'UPDATE activities SET name = ?, color = ?, icon = ?, default_increment = ?, unit = ?, weekly_target = ?, sort_order = ? WHERE id = ?',
     archive: 'UPDATE activities SET archived = 1 WHERE id = ?',
+    unarchive: 'UPDATE activities SET archived = 0 WHERE id = ?',
     delete: 'DELETE FROM activities WHERE id = ?',
     updateSortOrder: 'UPDATE activities SET sort_order = ? WHERE id = ?'
   },
@@ -73,6 +78,7 @@ export const SQL = {
   },
   dayNotes: {
     listByRange: 'SELECT * FROM day_notes WHERE date BETWEEN ? AND ? ORDER BY date ASC',
+    search: `SELECT * FROM day_notes WHERE content LIKE ? ESCAPE '\\' ORDER BY date DESC LIMIT 20`,
     upsert: `INSERT INTO day_notes (date, content, updated_at) VALUES (?, ?, ?)
              ON CONFLICT(date) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at`,
     delete: 'DELETE FROM day_notes WHERE date = ?'
@@ -85,6 +91,8 @@ export interface ActivityRow {
   color: string
   icon: string | null
   default_increment: number
+  unit: string | null
+  weekly_target: number | null
   archived: number
   sort_order: number
   created_at: string
@@ -108,6 +116,8 @@ export function toActivity(row: ActivityRow): Activity {
     color: row.color,
     icon: row.icon,
     defaultIncrement: row.default_increment,
+    unit: row.unit,
+    weeklyTarget: row.weekly_target,
     archived: row.archived === 1,
     sortOrder: row.sort_order,
     createdAt: row.created_at
@@ -176,6 +186,11 @@ export function toDayNote(row: DayNoteRow): DayNote {
     content: row.content,
     updatedAt: row.updated_at
   }
+}
+
+export function buildSearchPattern(query: string): string {
+  const escaped = query.replace(/[\\%_]/g, (c) => `\\${c}`)
+  return `%${escaped}%`
 }
 
 export function todayIso(): string {

@@ -5,6 +5,7 @@ import { THEMES, resolveActiveAccent } from '@renderer/lib/themes'
 import { FONTS, DEFAULT_FONT } from '@renderer/lib/fonts'
 import { fastSpring, sliderSpring } from '@renderer/lib/motionPresets'
 import { CustomThemeSection } from './CustomThemeSection'
+import { Tooltip } from '@renderer/components/ui/Tooltip'
 import iconLight from '@renderer/assets/icon-round-light.png'
 import iconDark from '@renderer/assets/icon-round-dark.png'
 import type { DockIconStyle } from '@shared/types'
@@ -26,34 +27,36 @@ function IconSwatch({
   onSelect: () => void
 }): JSX.Element {
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className="flex flex-col items-center gap-1.5"
-      aria-label={`App icon: ${name}`}
-    >
-      <div
-        className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full"
-        style={{
-          boxShadow: selected
-            ? `0 0 0 2px var(--surface), 0 0 0 4px var(--accent)`
-            : '0 0 0 1px var(--border)'
-        }}
+    <Tooltip label={`App icon: ${name}`} className="flex-col items-center gap-1.5">
+      <button
+        type="button"
+        onClick={onSelect}
+        className="flex flex-col items-center gap-1.5"
+        aria-label={`App icon: ${name}`}
       >
-        <img src={src} alt="" className="h-full w-full object-cover" />
-        {selected && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={fastSpring}
-            className="absolute inset-0 flex items-center justify-center rounded-full bg-black/30"
-          >
-            <Check size={16} className="text-white" />
-          </motion.div>
-        )}
-      </div>
-      <span className="text-[10px] text-[var(--text-muted)]">{name}</span>
-    </button>
+        <div
+          className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full"
+          style={{
+            boxShadow: selected
+              ? `0 0 0 2px var(--surface), 0 0 0 4px var(--accent)`
+              : '0 0 0 1px var(--border)'
+          }}
+        >
+          <img src={src} alt="" className="h-full w-full object-cover" />
+          {selected && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={fastSpring}
+              className="absolute inset-0 flex items-center justify-center rounded-full bg-black/30"
+            >
+              <Check size={16} className="text-white" />
+            </motion.div>
+          )}
+        </div>
+        <span className="text-[10px] text-[var(--text-muted)]">{name}</span>
+      </button>
+    </Tooltip>
   )
 }
 
@@ -75,44 +78,51 @@ function ThemeSwatch({
   return (
     <div className="group flex w-full flex-col items-center gap-1.5">
       <div className="relative h-11 w-11 flex-shrink-0">
-        <button
-          type="button"
-          onClick={onSelect}
-          aria-label={`Theme: ${name}`}
-          className="grid h-11 w-11 grid-cols-2 grid-rows-2 overflow-hidden rounded-lg border border-[var(--border)] shadow-elevation-sm"
-          style={{
-            boxShadow: selected
-              ? `0 0 0 2px var(--surface), 0 0 0 4px ${colors.accent}, var(--shadow-sm)`
-              : undefined
-          }}
+        <Tooltip label={name} className="h-11 w-11">
+          <button
+            type="button"
+            onClick={onSelect}
+            aria-label={`Theme: ${name}`}
+            className="grid h-11 w-11 grid-cols-2 grid-rows-2 overflow-hidden rounded-lg border border-[var(--border)] shadow-elevation-sm"
+            style={{
+              boxShadow: selected
+                ? `0 0 0 2px var(--surface), 0 0 0 4px ${colors.accent}, var(--shadow-sm)`
+                : undefined
+            }}
+          >
+            <div style={{ backgroundColor: colors.bg }} />
+            <div style={{ backgroundColor: colors.surface }} />
+            <div style={{ backgroundColor: colors.text }} />
+            <div style={{ backgroundColor: colors.accent }} />
+            {selected && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={fastSpring}
+                className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/30"
+              >
+                <Check size={16} className="text-white" />
+              </motion.div>
+            )}
+          </button>
+        </Tooltip>
+        <Tooltip
+          label={isFavorite ? `Unfavorite ${name}` : `Favorite ${name}`}
+          className="absolute -right-1.5 -top-1.5 z-10"
         >
-          <div style={{ backgroundColor: colors.bg }} />
-          <div style={{ backgroundColor: colors.surface }} />
-          <div style={{ backgroundColor: colors.text }} />
-          <div style={{ backgroundColor: colors.accent }} />
-          {selected && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={fastSpring}
-              className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/30"
-            >
-              <Check size={16} className="text-white" />
-            </motion.div>
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleFavorite()
-          }}
-          aria-label={isFavorite ? `Unfavorite ${name}` : `Favorite ${name}`}
-          className="absolute -right-1.5 -top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-amber-400 opacity-0 transition-opacity group-hover:opacity-100"
-          style={isFavorite ? { opacity: 1 } : undefined}
-        >
-          <Star size={11} fill={isFavorite ? 'currentColor' : 'none'} />
-        </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleFavorite()
+            }}
+            aria-label={isFavorite ? `Unfavorite ${name}` : `Favorite ${name}`}
+            className="flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-amber-400 opacity-0 transition-opacity group-hover:opacity-100"
+            style={isFavorite ? { opacity: 1 } : undefined}
+          >
+            <Star size={11} fill={isFavorite ? 'currentColor' : 'none'} />
+          </button>
+        </Tooltip>
       </div>
       <span className="line-clamp-2 h-7 w-full text-center text-[10px] leading-tight text-[var(--text-muted)]">
         {name}
@@ -197,20 +207,27 @@ export function AppearanceTab(): JSX.Element {
           </p>
         </div>
         <div className="flex flex-shrink-0 gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5">
-          {modeOptions.map(({ id, label, Icon, onClick }) => (
-            <button
-              key={id}
-              onClick={onClick}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors"
-              style={{
-                backgroundColor: activeMode === id ? 'var(--accent)' : 'transparent',
-                color: activeMode === id ? 'white' : 'var(--text-muted)'
-              }}
-            >
-              <Icon size={11} />
-              {label}
-            </button>
-          ))}
+          {modeOptions.map(({ id, label, Icon, onClick }) => {
+            const isActive = activeMode === id
+            return (
+              <button
+                key={id}
+                onClick={onClick}
+                className="relative flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors"
+                style={{ color: isActive ? 'white' : 'var(--text-muted)' }}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="activeThemeMode"
+                    transition={sliderSpring}
+                    className="absolute inset-0 rounded-md bg-[var(--accent)]"
+                  />
+                )}
+                <Icon size={11} className="relative" />
+                <span className="relative">{label}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -274,13 +291,15 @@ export function AppearanceTab(): JSX.Element {
           <span className="text-xs tabular-nums text-[var(--text-muted)]">
             {resolvedHeatmapColor}
           </span>
-          <input
-            type="color"
-            value={resolvedHeatmapColor}
-            onChange={(e) => setHeatmapColor(e.target.value)}
-            className="color-swatch-input shadow-elevation-sm"
-            aria-label="Heatmap color"
-          />
+          <Tooltip label={heatmapColorOverride ? 'Custom color' : 'Match theme'}>
+            <input
+              type="color"
+              value={resolvedHeatmapColor}
+              onChange={(e) => setHeatmapColor(e.target.value)}
+              className="color-swatch-input shadow-elevation-sm"
+              aria-label="Heatmap color"
+            />
+          </Tooltip>
         </div>
       </div>
 

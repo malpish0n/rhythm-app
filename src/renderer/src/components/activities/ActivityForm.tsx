@@ -14,6 +14,8 @@ interface ActivityFormProps {
     color: string
     icon: string | null
     defaultIncrement: number
+    unit: string | null
+    weeklyTarget: number | null
   }) => void
   onCancel: () => void
 }
@@ -29,6 +31,10 @@ export function ActivityForm({
     initial?.color ?? CATEGORY_PALETTE[existingCount % CATEGORY_PALETTE.length]
   )
   const [icon, setIcon] = useState<string | null>(initial?.icon ?? null)
+  const [unit, setUnit] = useState(initial?.unit ?? '')
+  const [weeklyTarget, setWeeklyTarget] = useState(
+    initial?.weeklyTarget ? String(initial.weeklyTarget) : ''
+  )
   const defaultIncrement = initial?.defaultIncrement ?? 1
 
   const canSubmit = name.trim().length > 0
@@ -38,7 +44,15 @@ export function ActivityForm({
       onSubmit={(e) => {
         e.preventDefault()
         if (!canSubmit) return
-        onSubmit({ name: name.trim(), color, icon, defaultIncrement })
+        const parsedTarget = Number.parseInt(weeklyTarget, 10)
+        onSubmit({
+          name: name.trim(),
+          color,
+          icon,
+          defaultIncrement,
+          unit: unit.trim() || null,
+          weeklyTarget: weeklyTarget.trim() && Number.isFinite(parsedTarget) ? parsedTarget : null
+        })
       }}
       className="flex flex-col gap-4"
     >
@@ -69,6 +83,34 @@ export function ActivityForm({
         <ActivityIconPicker value={icon} onChange={setIcon} />
       </div>
 
+      <div>
+        <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">
+          Unit (optional)
+        </label>
+        <input
+          value={unit}
+          onChange={(e) => setUnit(e.target.value)}
+          placeholder="e.g. glasses, pages, min"
+          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">
+          Weekly goal (optional)
+        </label>
+        <input
+          type="number"
+          min={1}
+          max={99}
+          inputMode="numeric"
+          value={weeklyTarget}
+          onChange={(e) => setWeeklyTarget(e.target.value)}
+          placeholder="e.g. 3 — times per week"
+          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
+        />
+      </div>
+
       <div className="mt-2 flex justify-end gap-2">
         <button
           type="button"
@@ -83,11 +125,7 @@ export function ActivityForm({
           transition={fastSpring}
           type="submit"
           disabled={!canSubmit}
-          className="rounded-lg px-4 py-1.5 text-sm font-medium text-white shadow-elevation-sm transition-shadow hover:shadow-elevation-md disabled:opacity-40 disabled:shadow-none active:shadow-none"
-          style={{
-            backgroundImage:
-              'linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, white), var(--accent))'
-          }}
+          className="accent-gradient rounded-lg px-4 py-1.5 text-sm font-medium text-white shadow-elevation-sm transition-shadow hover:shadow-elevation-md disabled:opacity-40 disabled:shadow-none active:shadow-none"
         >
           {initial ? 'Save' : 'Create'}
         </motion.button>

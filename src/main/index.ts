@@ -4,6 +4,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcHandlers } from './ipc/handlers'
 import { getDb } from './db/connection'
 import { applyDockIcon } from './dockIcon'
+import { createTray } from './tray'
+import { startNotificationScheduler } from './notifications'
 import * as prefsRepo from './db/repositories/prefsRepo'
 
 const devIconPath = join(__dirname, '../../build/icon.png')
@@ -52,6 +54,8 @@ app.whenReady().then(() => {
   getDb()
   applyDockIcon(prefsRepo.getDockIconStyle())
   registerIpcHandlers()
+  createTray()
+  startNotificationScheduler()
 
   createWindow()
 

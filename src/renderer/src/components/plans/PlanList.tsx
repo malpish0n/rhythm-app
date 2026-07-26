@@ -4,6 +4,7 @@ import { Repeat, Trash2 } from 'lucide-react'
 import { usePlanRules } from '@renderer/hooks/usePlanRules'
 import { getActivityIcon } from '@renderer/lib/icons'
 import { RecurrencePicker, type RecurrenceValue } from './RecurrencePicker'
+import { Tooltip } from '@renderer/components/ui/Tooltip'
 import type { Activity, PlanRule } from '@shared/types'
 
 const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -98,20 +99,24 @@ export function PlanList({ activities }: PlanListProps): JSX.Element | null {
                 {Icon && <Icon size={13} className="flex-shrink-0 text-[var(--text-muted)]" />}
                 <span className="flex-1 truncate text-sm">{activity.name}</span>
                 <span className="text-xs text-[var(--text-muted)]">{describe(rule)}</span>
-                <button
-                  onClick={() => setEditingId(rule.id)}
-                  className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
-                  aria-label="Edit schedule"
-                >
-                  <Repeat size={13} />
-                </button>
-                <button
-                  onClick={() => deletePlan(rule.id)}
-                  className="rounded-md p-1 text-[var(--text-muted)] hover:text-red-500"
-                  aria-label="Delete schedule"
-                >
-                  <Trash2 size={13} />
-                </button>
+                <Tooltip label="Edit schedule">
+                  <button
+                    onClick={() => setEditingId(rule.id)}
+                    className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
+                    aria-label="Edit schedule"
+                  >
+                    <Repeat size={13} />
+                  </button>
+                </Tooltip>
+                <Tooltip label="Delete schedule">
+                  <button
+                    onClick={() => deletePlan(rule.id)}
+                    className="rounded-md p-1 text-[var(--text-muted)] hover:text-red-500"
+                    aria-label="Delete schedule"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </Tooltip>
               </motion.div>
             )
           })}

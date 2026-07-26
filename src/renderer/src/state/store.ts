@@ -8,6 +8,7 @@ import type { Activity, DockIconStyle, PlanRule } from '@shared/types'
 
 export type CategoryFilter = 'all' | string
 export type CalendarFormat = 'day' | 'week' | 'month'
+export type AppView = 'home' | 'calendar' | 'stats'
 
 export interface MonthCursor {
   year: number
@@ -15,6 +16,8 @@ export interface MonthCursor {
 }
 
 interface AppState {
+  activeView: AppView
+  setActiveView: (view: AppView) => void
   calendarFormat: CalendarFormat
   setCalendarFormat: (format: CalendarFormat) => void
   dayCursor: string
@@ -47,6 +50,8 @@ interface AppState {
   setActivityDialogOpen: (open: boolean) => void
   settingsOpen: boolean
   setSettingsOpen: (open: boolean) => void
+  commandPaletteOpen: boolean
+  setCommandPaletteOpen: (open: boolean) => void
   reduceMotion: boolean
   setReduceMotion: (value: boolean) => void
   fontId: string
@@ -65,6 +70,12 @@ const FONT_KEY = 'rhythm:fontId'
 const TIME_FORMAT_KEY = 'rhythm:timeFormat'
 const FAVORITE_THEMES_KEY = 'rhythm:favoriteThemes'
 const HEATMAP_COLOR_KEY = 'rhythm:heatmapColor'
+const ACTIVE_VIEW_KEY = 'rhythm:activeView'
+
+function loadActiveView(): AppView {
+  const raw = localStorage.getItem(ACTIVE_VIEW_KEY)
+  return raw === 'home' || raw === 'calendar' || raw === 'stats' ? raw : 'home'
+}
 
 function loadFavoriteThemes(): string[] {
   try {
@@ -77,6 +88,11 @@ function loadFavoriteThemes(): string[] {
 const initialCustomTheme = loadCustomTheme()
 
 export const useAppStore = create<AppState>((set) => ({
+  activeView: loadActiveView(),
+  setActiveView: (activeView) => {
+    localStorage.setItem(ACTIVE_VIEW_KEY, activeView)
+    set({ activeView })
+  },
   calendarFormat: 'month',
   setCalendarFormat: (calendarFormat) => set({ calendarFormat }),
   dayCursor: todayIso(),
@@ -120,6 +136,8 @@ export const useAppStore = create<AppState>((set) => ({
   setActivityDialogOpen: (activityDialogOpen) => set({ activityDialogOpen }),
   settingsOpen: false,
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
+  commandPaletteOpen: false,
+  setCommandPaletteOpen: (commandPaletteOpen) => set({ commandPaletteOpen }),
   reduceMotion: localStorage.getItem(REDUCE_MOTION_KEY) === 'true',
   setReduceMotion: (reduceMotion) => {
     localStorage.setItem(REDUCE_MOTION_KEY, String(reduceMotion))

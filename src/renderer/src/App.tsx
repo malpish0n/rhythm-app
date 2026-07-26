@@ -1,49 +1,44 @@
 import { useEffect, useState } from 'react'
-import { MotionConfig, motion } from 'motion/react'
+import { AnimatePresence, MotionConfig, motion } from 'motion/react'
 import { CalendarPlus } from 'lucide-react'
 import { useAppStore } from '@renderer/state/store'
 import { useActivities } from '@renderer/hooks/useActivities'
 import { DEFAULT_DARK_THEME, DEFAULT_LIGHT_THEME, THEME_MAP } from '@renderer/lib/themes'
 import { FONT_MAP, DEFAULT_FONT } from '@renderer/lib/fonts'
+import { fade } from '@renderer/lib/motionPresets'
 import { Sidebar } from '@renderer/components/layout/Sidebar'
-import { ContentHeader } from '@renderer/components/layout/ContentHeader'
-import { YearNav } from '@renderer/components/layout/YearNav'
 import { MobileBottomBar } from '@renderer/components/layout/MobileBottomBar'
-import { YearCalendar } from '@renderer/components/calendar/YearCalendar'
-import { MonthCalendar } from '@renderer/components/calendar/MonthCalendar'
-import { WeekView } from '@renderer/components/calendar/WeekView'
-import { DayView } from '@renderer/components/calendar/DayView'
-import { addDays, todayIso, weekRange } from '@renderer/lib/date'
-import { StatsPanel } from '@renderer/components/stats/StatsPanel'
-import { TodayCard } from '@renderer/components/stats/TodayCard'
-import { SummaryView } from '@renderer/components/stats/SummaryView'
+import { todayIso } from '@renderer/lib/date'
+import { HomeView } from '@renderer/views/HomeView'
+import { CalendarView } from '@renderer/views/CalendarView'
+import { StatsView } from '@renderer/views/StatsView'
 import { ActivityManagerDialog } from '@renderer/components/activities/ActivityManagerDialog'
 import { SettingsDialog } from '@renderer/components/settings/SettingsDialog'
+import { CommandPalette } from '@renderer/components/layout/CommandPalette'
 import { QuickAddFab } from '@renderer/components/quickadd/QuickAddFab'
-import { PlanList } from '@renderer/components/plans/PlanList'
+import { TrayQuickLog } from '@renderer/components/tray/TrayQuickLog'
+
+const isTrayWindow = new URLSearchParams(window.location.search).get('tray') === '1'
 
 function App(): JSX.Element {
   const themeId = useAppStore((s) => s.themeId)
   const setThemeId = useAppStore((s) => s.setThemeId)
   const setThemeMode = useAppStore((s) => s.setThemeMode)
   const setDockIconStyle = useAppStore((s) => s.setDockIconStyle)
-  const year = useAppStore((s) => s.year)
-  const setYear = useAppStore((s) => s.setYear)
+  const activeView = useAppStore((s) => s.activeView)
+  const setActiveView = useAppStore((s) => s.setActiveView)
   const categoryFilter = useAppStore((s) => s.categoryFilter)
   const setCategoryFilter = useAppStore((s) => s.setCategoryFilter)
-  const calendarFormat = useAppStore((s) => s.calendarFormat)
   const setCalendarFormat = useAppStore((s) => s.setCalendarFormat)
-  const monthCursor = useAppStore((s) => s.monthCursor)
-  const setMonthCursor = useAppStore((s) => s.setMonthCursor)
-  const dayCursor = useAppStore((s) => s.dayCursor)
   const setDayCursor = useAppStore((s) => s.setDayCursor)
-  const weekCursor = useAppStore((s) => s.weekCursor)
   const setWeekCursor = useAppStore((s) => s.setWeekCursor)
-  const refreshToken = useAppStore((s) => s.refreshToken)
+  const setMonthCursor = useAppStore((s) => s.setMonthCursor)
   const activityDialogOpen = useAppStore((s) => s.activityDialogOpen)
   const setActivityDialogOpen = useAppStore((s) => s.setActivityDialogOpen)
   const settingsOpen = useAppStore((s) => s.settingsOpen)
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen)
+  const commandPaletteOpen = useAppStore((s) => s.commandPaletteOpen)
+  const setCommandPaletteOpen = useAppStore((s) => s.setCommandPaletteOpen)
   const reduceMotion = useAppStore((s) => s.reduceMotion)
   const fontId = useAppStore((s) => s.fontId)
   const customThemeColors = useAppStore((s) => s.customThemeColors)
@@ -95,45 +90,16 @@ function App(): JSX.Element {
     document.documentElement.style.setProperty('--font-sans', font.stack)
   }, [fontId])
 
-  const goPrevMonth = (): void => {
-    let { year: y, month: m } = monthCursor
-    m -= 1
-    if (m < 0) {
-      m = 11
-      y -= 1
+  useEffect(() => {
+    const handler = (e: KeyboardEvent): void => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setCommandPaletteOpen(true)
+      }
     }
-    setMonthCursor({ year: y, month: m })
-  }
-
-  const goNextMonth = (): void => {
-    const now = new Date()
-    if (monthCursor.year === now.getFullYear() && monthCursor.month === now.getMonth()) return
-    let { year: y, month: m } = monthCursor
-    m += 1
-    if (m > 11) {
-      m = 0
-      y += 1
-    }
-    setMonthCursor({ year: y, month: m })
-  }
-
-  const goPrevDay = (): void => {
-    setDayCursor(addDays(dayCursor, -1))
-  }
-
-  const goNextDay = (): void => {
-    if (dayCursor === todayIso()) return
-    setDayCursor(addDays(dayCursor, 1))
-  }
-
-  const goPrevWeek = (): void => {
-    setWeekCursor(addDays(weekCursor, -7))
-  }
-
-  const goNextWeek = (): void => {
-    if (weekRange(weekCursor).start === weekRange(todayIso()).start) return
-    setWeekCursor(addDays(weekCursor, 7))
-  }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [setCommandPaletteOpen])
 
   const openCategoryManager = (): void => {
     setActivityDialogStartNew(false)
@@ -149,6 +115,16 @@ function App(): JSX.Element {
     setSettingsOpen(true)
   }
 
+  const goToToday = (): void => {
+    const today = todayIso()
+    const now = new Date()
+    setDayCursor(today)
+    setWeekCursor(today)
+    setMonthCursor({ year: now.getFullYear(), month: now.getMonth() })
+    setCalendarFormat('day')
+    setActiveView('calendar')
+  }
+
   if (apiMissing) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-[var(--bg)] text-[var(--text)]">
@@ -156,6 +132,14 @@ function App(): JSX.Element {
           Preload API not available — open this app through Electron, not a plain browser tab.
         </p>
       </div>
+    )
+  }
+
+  if (isTrayWindow) {
+    return (
+      <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
+        <TrayQuickLog />
+      </MotionConfig>
     )
   }
 
@@ -196,79 +180,29 @@ function App(): JSX.Element {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={openNewCategory}
-                  className="mt-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-elevation-sm transition-shadow hover:shadow-elevation-md"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, white), var(--accent))'
-                  }}
+                  className="accent-gradient mt-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-elevation-sm transition-shadow hover:shadow-elevation-md"
                 >
                   Create your first activity
                 </motion.button>
               </motion.div>
             ) : (
-              <>
-                <ContentHeader
-                  calendarFormat={calendarFormat}
-                  onCalendarFormatChange={setCalendarFormat}
-                  monthCursor={monthCursor}
-                  onPrevMonth={goPrevMonth}
-                  onNextMonth={goNextMonth}
-                  dayCursor={dayCursor}
-                  onPrevDay={goPrevDay}
-                  onNextDay={goNextDay}
-                  weekCursor={weekCursor}
-                  onPrevWeek={goPrevWeek}
-                  onNextWeek={goNextWeek}
-                />
-
-                {calendarFormat === 'day' ? (
-                  <DayView date={dayCursor} activities={activities} refreshToken={refreshToken} />
-                ) : calendarFormat === 'week' ? (
-                  <WeekView
-                    weekCursor={weekCursor}
-                    activities={activities}
-                    categoryFilter={categoryFilter}
-                    refreshToken={refreshToken}
-                  />
-                ) : (
-                  <MonthCalendar
-                    year={monthCursor.year}
-                    month={monthCursor.month}
-                    activities={activities}
-                    categoryFilter={categoryFilter}
-                    refreshToken={refreshToken}
-                  />
-                )}
-
-                <TodayCard activities={activities} refreshToken={refreshToken} />
-
-                <PlanList activities={activities} />
-
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-[var(--text-muted)]">Statistics</h2>
-                  <YearNav
-                    year={year}
-                    onPrevYear={() => setYear(year - 1)}
-                    onNextYear={() => setYear(Math.min(year + 1, new Date().getFullYear()))}
-                  />
-                </div>
-
-                <YearCalendar
-                  year={year}
-                  activities={activities}
-                  categoryFilter={categoryFilter}
-                  refreshToken={refreshToken}
-                />
-
-                <SummaryView
-                  year={year}
-                  activities={activities}
-                  categoryFilter={categoryFilter}
-                  refreshToken={refreshToken}
-                />
-
-                <StatsPanel activities={activities} refreshToken={refreshToken} />
-              </>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeView}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={fade}
+                >
+                  {activeView === 'home' ? (
+                    <HomeView />
+                  ) : activeView === 'calendar' ? (
+                    <CalendarView />
+                  ) : (
+                    <StatsView />
+                  )}
+                </motion.div>
+              </AnimatePresence>
             )}
           </div>
         </main>
@@ -280,6 +214,15 @@ function App(): JSX.Element {
         />
 
         <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+        <CommandPalette
+          open={commandPaletteOpen}
+          onClose={() => setCommandPaletteOpen(false)}
+          activities={activities}
+          onGoToToday={goToToday}
+          onOpenSettings={openSettings}
+          onManageCategories={openCategoryManager}
+        />
 
         <MobileBottomBar
           activities={activities}

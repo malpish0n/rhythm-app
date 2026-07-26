@@ -7,6 +7,7 @@ import { expandPlanRule } from '@renderer/lib/planRecurrence'
 import { getActivityIcon } from '@renderer/lib/icons'
 import { todayIso } from '@renderer/lib/date'
 import { fastSpring } from '@renderer/lib/motionPresets'
+import { Tooltip } from '@renderer/components/ui/Tooltip'
 import { ActivityTimePopover, type ActivityTimeValue } from './ActivityTimePopover'
 import { DayNoteSection } from './DayNoteSection'
 import type { Activity, LogEntry } from '@shared/types'
@@ -135,6 +136,11 @@ export function DayAgenda({
               {Icon && <Icon size={13} className="text-[var(--text-muted)]" />}
               <span className="flex-1 text-sm">
                 {activity.name}
+                {activity.unit && (
+                  <span className="ml-1.5 text-xs tabular-nums text-[var(--text-muted)]">
+                    {entry.count} {activity.unit}
+                  </span>
+                )}
                 {entry.time && (
                   <span className="ml-1.5 text-xs text-[var(--text-muted)]">
                     {entry.time}
@@ -142,20 +148,24 @@ export function DayAgenda({
                   </span>
                 )}
               </span>
-              <button
-                onClick={() => setEditingEntryId(entry.id)}
-                className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
-                aria-label="Edit time or note"
-              >
-                <Pencil size={13} />
-              </button>
-              <button
-                onClick={() => handleDelete(entry.id)}
-                className="rounded-md p-1 text-[var(--text-muted)] hover:text-red-500"
-                aria-label="Delete entry"
-              >
-                <Trash2 size={13} />
-              </button>
+              <Tooltip label="Edit">
+                <button
+                  onClick={() => setEditingEntryId(entry.id)}
+                  className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
+                  aria-label="Edit time or note"
+                >
+                  <Pencil size={13} />
+                </button>
+              </Tooltip>
+              <Tooltip label="Delete">
+                <button
+                  onClick={() => handleDelete(entry.id)}
+                  className="rounded-md p-1 text-[var(--text-muted)] hover:text-red-500"
+                  aria-label="Delete entry"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </Tooltip>
             </div>
           )
         })}
@@ -189,13 +199,15 @@ export function DayAgenda({
                   Log now
                 </button>
               )}
-              <button
-                onClick={() => skipOccurrence(rule.id, date)}
-                className="rounded-md p-1 text-[var(--text-muted)] hover:text-red-500"
-                aria-label="Skip this occurrence"
-              >
-                <X size={13} />
-              </button>
+              <Tooltip label="Skip">
+                <button
+                  onClick={() => skipOccurrence(rule.id, date)}
+                  className="rounded-md p-1 text-[var(--text-muted)] hover:text-red-500"
+                  aria-label="Skip this occurrence"
+                >
+                  <X size={13} />
+                </button>
+              </Tooltip>
             </div>
           )
         })}

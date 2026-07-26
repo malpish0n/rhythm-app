@@ -4,6 +4,7 @@ export const CHANNELS = {
     create: 'activities:create',
     update: 'activities:update',
     archive: 'activities:archive',
+    unarchive: 'activities:unarchive',
     delete: 'activities:delete',
     reorder: 'activities:reorder'
   },
@@ -29,6 +30,7 @@ export const CHANNELS = {
   },
   dayNotes: {
     listByRange: 'dayNotes:listByRange',
+    search: 'dayNotes:search',
     upsert: 'dayNotes:upsert',
     delete: 'dayNotes:delete'
   },
@@ -36,6 +38,8 @@ export const CHANNELS = {
     getTheme: 'app:getTheme',
     setTheme: 'app:setTheme',
     getDockIconStyle: 'app:getDockIconStyle',
-    setDockIconStyle: 'app:setDockIconStyle'
+    setDockIconStyle: 'app:setDockIconStyle',
+    getNotificationPrefs: 'app:getNotificationPrefs',
+    setNotificationPrefs: 'app:setNotificationPrefs'
   }
 } as const
